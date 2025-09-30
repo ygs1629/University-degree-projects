@@ -1,9 +1,3 @@
-[submodule "BT-2025"]
-	path = BT-2025
-	url = https://github.com/ygs1629/BT-2025.git
-[submodule "Time-Series-Forecasting-of-IBEX-35-Stocks"]
-	path = Time-Series-Forecasting-of-IBEX-35-Stocks
-	url = https://github.com/ygs1629/Time-Series-Forecasting-of-IBEX-35-Stocks.git
 [submodule "Sentiment-Analysis-Spanish-lexicon-"]
 	path = Sentiment-Analysis-Spanish-lexicon-
 	url = https://github.com/ygs1629/Sentiment-Analysis-Spanish-lexicon-.git
