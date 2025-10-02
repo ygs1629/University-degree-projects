@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Juan Luis German Saura" />
+
+
+<title>Predicción de series temporales</title>
+
+<script src="libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.10.4/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Predicción de series temporales</h1>
+<h4 class="author">Juan Luis German Saura</h4>
+<h4 class="date">Sept-2025</h4>
+
+</div>
+
+
+<p><br />
+</p>
+<div id="introducción" class="section level2">
+<h2>Introducción</h2>
+<p><br />
+<br />
+Las series temporales constituyen uno de los pilares fundamentales del
+análisis de datos estructurados. Su estudio permite no solo caracterizar
+dinámicas en el tiempo, sino también poner a prueba teorías económicas y
+financieras bajo evidencia empírica real.<br />
+De esta forma, surge este proyecto incial, con el que se pretende
+evaluar la capacidad predictiva de modelos clásicos de series temporales
+aplicados a retornos financieros del IBEX y de empresas representativas
+(una por sector).<br />
+<br />
+A partir de un EDA inicial, en el que se investigan aspectos como la
+volatilidad, patrones estacionales y correlaciones respecto al índice de
+referencia, se consigue tener una aproximación preliminar a la
+estructura de los datos. Con esta base, se procede a contrastar mediante
+modelos predictivos si existe alguna estructura temporal
+aprovechable.<br />
+</p>
+<pre class="r"><code>library(quantmod)
+library(tidyquant)
+library(dplyr)
+library(lubridate)
+library(tidyr)
+library(ggplot2)
+library(xts)
+library(zoo)
+library(moments)
+library(ggpubr)
+library(kableExtra)
+library(gridExtra)
+library(plotly)
+library(knitr)
+library(purrr)
+library(forecast)
+library(vars)</code></pre>
+<p><br />
+<br />
+</p>
+</div>
+<div id="extracción-de-datos-y-limpieza" class="section level2">
+<h2>Extracción de datos y limpieza</h2>
+<p><br />
+Los datos se extraen directamente desde la herramienta financiera Yahoo
+Finance. Comprenden la ventana temporal desde enero de 2016 hasta
+diciembre de 2024. La frecuencia temporal escogida es mensual para
+correer menos riesgos de encontrar valores pérdidos dentro de cada
+dataframe.<br />
+<br />
+</p>
+<pre class="r"><code>#RAW DATA 
+ibex_mensual &lt;- getSymbols(&quot;^IBEX&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;,
+                           periodicity = &quot;monthly&quot;,auto.assign = F)
+
+san_mc &lt;- getSymbols(&quot;SAN.MC&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;, 
+                     periodicity = &quot;monthly&quot;,auto.assign = F)
+
+itx_mc &lt;- getSymbols(&quot;ITX.MC&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;, 
+                     periodicity = &quot;monthly&quot;,auto.assign = F)
+
+ibe_mc &lt;- getSymbols(&quot;IBE.MC&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;, 
+                     periodicity = &quot;monthly&quot;,auto.assign = F)
+
+grf_mc &lt;- getSymbols(&quot;GRF.MC&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;, 
+                     periodicity = &quot;monthly&quot;, auto.assign = FALSE)
+
+fer_mc &lt;- getSymbols(&quot;FER.MC&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;, 
+                     periodicity = &quot;monthly&quot;,auto.assign = F)
+
+tef_mc &lt;- getSymbols(&quot;TEF.MC&quot;, src = &quot;yahoo&quot;, from = &quot;2016-01-01&quot;, to = &quot;2025-01-01&quot;, 
+                     periodicity = &quot;monthly&quot;,auto.assign = F)</code></pre>
+<pre class="r"><code>#CLEAN DATA
+datasets &lt;- list(ibex_mensual, san_mc, itx_mc, ibe_mc, grf_mc, fer_mc, tef_mc)
+nombres &lt;- c(&quot;ibex_mensual&quot;, &quot;san_mc&quot;, &quot;itx_mc&quot;, &quot;ibe_mc&quot;, &quot;grf_mc&quot;, &quot;fer_mc&quot;, &quot;tef_mc&quot;)
+
+for (i in seq_along(datasets)) {
+  assign(nombres[i], datasets[[i]][, c(4,6)])
+}</code></pre>
+<p><br />
+Al no tener ni NAs en ningun df y poseer todos las mismas dimensiones,
+así como la misma clase incial de serie temporal, se puede pasar ya a la
+siguiente etapa.<br />
+<br />
+</p>
+</div>
+<div id="preprocesado-de-los-datos" class="section level2">
+<h2>Preprocesado de los datos</h2>
+<p><br />
+En el contexto de los datos financieros, aplicar logaritmos a los
+rendimientos es una condición casi necesaria pero no suficiente para
+trabajar con series financieras bajo los supuestos de normalidad de
+muchos modelos. Se hace con la intención de acercar la distribución a la
+normalidad y así es más probable acercarse a una mejora de las
+propiedades de la serie temporal.Asimismo, estos datos serian la versión
+con features sobre la que se trabajaría a partir de ahora.<br />
+</p>
+<pre class="r"><code>calcular_retornos_log &lt;- function(df) {
+  df &lt;- df[order(index(df)), ]
+
+  col_adjusted &lt;- grep(&quot;Adjusted&quot;, colnames(df), value = TRUE, ignore.case = TRUE)
+  
+  if (length(col_adjusted) == 0) {
+    stop(&quot;No se encontró ninguna columna &#39;Adjusted&#39; en el dataframe&quot;)
+  }
+  
+  if (length(col_adjusted) &gt; 1) {
+    warning(&quot;Múltiples columnas &#39;Adjusted&#39; encontradas. Usando la primera: &quot;, col_adjusted[1])
+    col_adjusted &lt;- col_adjusted[1]}
+  
+  retornos &lt;- diff(log(df[, col_adjusted])) * 100
+  
+  nuevo_nombre &lt;- paste0(&quot;log_return_&quot;, col_adjusted)
+  colnames(retornos) &lt;- nuevo_nombre
+  
+  resultado &lt;- merge(df, retornos)
+  
+  return(resultado)}
+
+
+for (i in seq_along(datasets)) {
+  temp_df &lt;- calcular_retornos_log(datasets[[i]])
+  assign(nombres[i], temp_df)}</code></pre>
+<p><br />
+Sin embargo, la aplicación de esta técnica no exime de comprobar la
+distribución de la distribución de la serie tras la implementación, ya
+que utilizar la técnica no implica que se consiga la transformación
+total de la distribución automáticamente.<br />
+<br />
+Para salir de dudas, se realiza una tabla sobre la prueba de
+Shapiro-Wilk, de la simetría de la distribución y de la prueba de
+Curtosis, acompañado de un gráfico, para revisar el estado de las
+distribuciones de cada serie.<br />
+<br />
+</p>
+<pre class="r"><code>datasets &lt;- list(ibex_mensual, san_mc, itx_mc, ibe_mc, grf_mc, fer_mc, tef_mc)
+nombres &lt;- c(&quot;IBEX&quot;, &quot;SAN&quot;, &quot;ITX&quot;, &quot;IBE&quot;, &quot;GRF&quot;, &quot;FER&quot;, &quot;TEF&quot;)
+
+
+resultados_normalidad &lt;- data.frame(
+  Activo = character(),
+  Shapiro_Wilk_p = numeric(),
+  Asimetria = numeric(),
+  Curtosis = numeric(),
+  stringsAsFactors = FALSE)
+
+plots_qq &lt;- list()
+plots_densidad &lt;- list()
+
+
+for (i in seq_along(datasets)) {
+  df &lt;- as.data.frame(datasets[[i]])
+  col_name &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)
+  
+  if (length(col_name) == 0) next
+  
+  retornos_vector &lt;- na.omit(df[[col_name]])
+  
+  if (length(retornos_vector) &lt; 3) next
+  
+  shapiro_test &lt;- shapiro.test(retornos_vector)
+  asimetria &lt;- skewness(retornos_vector)
+  curtosis &lt;- kurtosis(retornos_vector) - 3
+  
+  resultados_normalidad &lt;- rbind(resultados_normalidad, data.frame(
+    Activo = nombres[i],
+    Shapiro_Wilk_p = shapiro_test$p.value,
+    Asimetria = asimetria,
+    Curtosis = curtosis,
+    stringsAsFactors = FALSE
+  ))
+  
+  qq_values &lt;- qqnorm(retornos_vector, plot.it = FALSE)
+  qq_data &lt;- data.frame(
+    Theoretical = qq_values$x,
+    Sample = qq_values$y
+  )
+  
+  plots_qq[[nombres[i]]] &lt;- ggplot(qq_data, aes(x = Theoretical, y = Sample)) +
+    geom_point(alpha = 0.7, color = &quot;steelblue&quot;, size = 2) +
+    geom_abline(intercept = mean(retornos_vector), slope = sd(retornos_vector), 
+                color = &quot;red&quot;, linetype = &quot;dashed&quot;, linewidth = 1) +
+    labs(title = paste(&quot;Q-Q Plot -&quot;, nombres[i]),
+         x = &quot;Cuantiles Teóricos&quot;, y = &quot;Cuantiles Muestrales&quot;) +
+    theme_minimal()
+  
+  densidad_data &lt;- data.frame(Retornos = retornos_vector)
+  plots_densidad[[nombres[i]]] &lt;- ggplot(densidad_data, aes(x = Retornos)) +
+    geom_histogram(aes(y = ..density..), bins = 25, 
+                   fill = &quot;lightblue&quot;, alpha = 0.7) +
+    geom_density(color = &quot;darkblue&quot;, linewidth = 1) +
+    stat_function(fun = dnorm, 
+                  args = list(mean = mean(retornos_vector), sd = sd(retornos_vector)),
+                  color = &quot;red&quot;, linetype = &quot;dashed&quot;, linewidth = 1) +
+    labs(title = paste(&quot;Densidad -&quot;, nombres[i]),
+         x = &quot;Retornos Logarítmicos&quot;, y = &quot;Densidad&quot;) +
+    theme_minimal()
+}
+
+if (nrow(resultados_normalidad) &gt; 0) {
+  resultados_normalidad$Shapiro_Wilk_p &lt;- round(resultados_normalidad$Shapiro_Wilk_p, 6)
+  resultados_normalidad$Asimetria &lt;- round(resultados_normalidad$Asimetria, 4)
+  resultados_normalidad$Curtosis &lt;- round(resultados_normalidad$Curtosis, 4)
+  resultados_normalidad$Normalidad &lt;- ifelse(resultados_normalidad$Shapiro_Wilk_p &lt; 0.05, 
+                                             &quot;No Normal&quot;, &quot;Normal&quot;)
+}
+
+if (length(plots_qq) &gt; 0) {
+  grid.arrange(grobs = plots_qq, ncol = 3, 
+               top = &quot;Gráficos Q-Q de Normalidad - Retornos Logarítmicos&quot;)
+}</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>if (length(plots_densidad) &gt; 0) {
+  grid.arrange(grobs = plots_densidad, ncol = 3,
+               top = &quot;Distribuciones de Densidad - Retornos Logarítmicos&quot;)
+}</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-5-2.png" width="672" /><br />
+</p>
+<pre class="r"><code>resultados_normalidad %&gt;%
+  mutate(Shapiro_Wilk_p = format(Shapiro_Wilk_p, scientific = FALSE)) %&gt;%
+  kable(align = &quot;c&quot;, 
+        caption = &quot;Resultados de Tests de Normalidad - Retornos Logarítmicos&quot;,
+        col.names = c(&quot;Activo&quot;, &quot;p-value Shapiro-Wilk&quot;, &quot;Asimetría&quot;, &quot;Curtosis&quot;, &quot;Normalidad&quot;)) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;), 
+                full_width = FALSE) %&gt;%
+  row_spec(which(resultados_normalidad$Normalidad == &quot;Normal&quot;), 
+           background = &quot;lightblue&quot;) %&gt;%
+  row_spec(which(resultados_normalidad$Normalidad == &quot;No Normal&quot;), 
+           background = &quot;lightcoral&quot;) %&gt;%
+  column_spec(2, color = ifelse(resultados_normalidad$Shapiro_Wilk_p &gt;= 0.05, &quot;blue&quot;, &quot;red&quot;)) %&gt;%
+  column_spec(5, color = ifelse(resultados_normalidad$Normalidad == &quot;Normal&quot;, &quot;blue&quot;, &quot;red&quot;), bold = TRUE)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Resultados de Tests de Normalidad - Retornos Logarítmicos
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Activo
+</th>
+<th style="text-align:center;">
+p-value Shapiro-Wilk
+</th>
+<th style="text-align:center;">
+Asimetría
+</th>
+<th style="text-align:center;">
+Curtosis
+</th>
+<th style="text-align:center;">
+Normalidad
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;background-color: lightcoral !important;">
+IBEX
+</td>
+<td style="text-align:center;background-color: lightcoral !important;color: red !important;">
+0.000003
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+-0.3513
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+6.4054
+</td>
+<td style="text-align:center;background-color: lightcoral !important;font-weight: bold;color: red !important;">
+No Normal
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: lightcoral !important;">
+SAN
+</td>
+<td style="text-align:center;background-color: lightcoral !important;color: red !important;">
+0.000121
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+-0.2909
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+4.3154
+</td>
+<td style="text-align:center;background-color: lightcoral !important;font-weight: bold;color: red !important;">
+No Normal
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: lightblue !important;">
+ITX
+</td>
+<td style="text-align:center;background-color: lightblue !important;color: blue !important;">
+0.154541
+</td>
+<td style="text-align:center;background-color: lightblue !important;">
+0.1196
+</td>
+<td style="text-align:center;background-color: lightblue !important;">
+1.1677
+</td>
+<td style="text-align:center;background-color: lightblue !important;font-weight: bold;color: blue !important;">
+Normal
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: lightblue !important;">
+IBE
+</td>
+<td style="text-align:center;background-color: lightblue !important;color: blue !important;">
+0.108359
+</td>
+<td style="text-align:center;background-color: lightblue !important;">
+-0.3646
+</td>
+<td style="text-align:center;background-color: lightblue !important;">
+0.9282
+</td>
+<td style="text-align:center;background-color: lightblue !important;font-weight: bold;color: blue !important;">
+Normal
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: lightcoral !important;">
+GRF
+</td>
+<td style="text-align:center;background-color: lightcoral !important;color: red !important;">
+0.000103
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+-1.0042
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+2.2212
+</td>
+<td style="text-align:center;background-color: lightcoral !important;font-weight: bold;color: red !important;">
+No Normal
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: lightcoral !important;">
+FER
+</td>
+<td style="text-align:center;background-color: lightcoral !important;color: red !important;">
+0.011924
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+-0.2010
+</td>
+<td style="text-align:center;background-color: lightcoral !important;">
+1.3025
+</td>
+<td style="text-align:center;background-color: lightcoral !important;font-weight: bold;color: red !important;">
+No Normal
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: lightblue !important;">
+TEF
+</td>
+<td style="text-align:center;background-color: lightblue !important;color: blue !important;">
+0.189771
+</td>
+<td style="text-align:center;background-color: lightblue !important;">
+-0.0940
+</td>
+<td style="text-align:center;background-color: lightblue !important;">
+1.2501
+</td>
+<td style="text-align:center;background-color: lightblue !important;font-weight: bold;color: blue !important;">
+Normal
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+Con estos resultados, de las seis empresas consideradas, la mitad de
+ellas siguen la distribución normal en sus retornos ajustados tras el
+suavizado logarítmico, mientras que las restantes junto con el propio
+mercado del IBEX 35 (benchmark), presentan el caso contrario.<br />
+<br />
+Esto quiere decir que, para Santander, Grifols y Ferrovial, se puede
+descartar la hipotésis nula de que la distribución en sus retornos
+ajustados exista normalidad, por lo que se acepta la hipotésis
+alternativa de no normalidad, debido a que el pvalue &lt; 0.05 (nivel de
+significancia común) ha demostrado que existe significancia estadistica,
+luego la distibucion de no normalidad en los datos considerados no es un
+producto del azar.<br />
+<br />
+En el contexto de las finanzas, una curtosis alta (aproximadamente 2) se
+suele relacionar en muchas ocasiones con altas volatilades, las cuales
+se encuentran sus mayores valores en aquellas que siguen distribuciones
+no normales, con Santander (4.3 muy alta), Grifols (2.2 alta ) y
+Ferrovial (1.3 no alta).Esto parece mostrar una correlación, faltaría
+comprobar la causalidad sobre esto.<br />
+<br />
+Asimismo, todas las empresas tienen una asimetría negativa (mayor
+probabilidad de tener pérdidas), salvo el caso de Inditex, que es la
+única que presenta una tendencia a la rentabilidad positiva.<br />
+<br />
+La evidencia de no normalidad en algunas de las distribuciones de
+retornos requerirá la implementación de técnicas de modelado robustas,
+para capturar adecuadamente las colas pesadas y asimetrías
+identificadas.<br />
+<br />
+</p>
+</div>
+<div id="eda" class="section level2">
+<h2>EDA</h2>
+<p><br />
+Continuando con el precedente de la sección previa, se sigue haciendo
+una breve pero valiosa exploración sobre los datos, para intentar
+encontrar patrones subyacentes que sean interesantes con tal de poder
+comprender la estructura de los datos y su evolución temporal.<br />
+<br />
+</p>
+<div id="precios-de-cierre-ajustados-y-retornos-logarítmicos"
+class="section level3">
+<h3>Precios de cierre ajustados y retornos logarítmicos</h3>
+<p><br />
+De esta manera, es necesario cotejar el desarrollo que han tenido los
+precios de cierre mensuales de cada empresa y del mercado.También es
+necesario ver la evolución conjunta de los retornos de todos en un mismo
+gráfico.<br />
+</p>
+<pre class="r"><code>precios_list &lt;- list()
+for (i in seq_along(datasets)) {
+  df &lt;- as.data.frame(datasets[[i]])
+  col_close &lt;- grep(&quot;\\.Close$&quot;, colnames(df), value = TRUE)
+  if (length(col_close) &gt; 0) {
+    temp_df &lt;- data.frame(
+      Fecha = index(datasets[[i]]),
+      Precio = df[[col_close]],
+      Activo = nombres[i]
+    )
+    precios_list[[nombres[i]]] &lt;- temp_df
+  }
+}
+
+precios_df &lt;- do.call(rbind, precios_list)
+
+plot_precios_final &lt;- ggplot(precios_df, aes(x = Fecha, y = Precio)) +
+  geom_line(color = &quot;steelblue&quot;, linewidth = 0.6) +
+  facet_wrap(~ Activo, scales = &quot;free_y&quot;, ncol = 3) +
+  labs(
+    title   = &quot;Evolución de Precios de Cierre por Activo&quot;,
+    x       = NULL,
+    y       = &quot;Precio (€)&quot;,
+    caption = &quot;Período: 01-2016 hasta 12-2024&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title    = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 12),
+    axis.text.x   = element_blank(),   
+    axis.ticks.x  = element_blank(),   
+    strip.text    = element_text(face = &quot;bold&quot;, size = 9),
+    panel.spacing = unit(0.8, &quot;lines&quot;),
+    plot.margin   = margin(5, 5, 25, 5, &quot;pt&quot;),
+    plot.caption  = element_text(hjust = 0.5, color = &quot;gray50&quot;,
+                                 face = &quot;italic&quot;, size = 8) )
+print(plot_precios_final)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /><br />
+</p>
+<pre class="r"><code>retornos_list &lt;- list()
+for (i in seq_along(datasets)) {
+  df &lt;- as.data.frame(datasets[[i]])
+  col_retorno &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)
+  if (length(col_retorno) &gt; 0) {
+    temp_df &lt;- data.frame(
+      Fecha = index(datasets[[i]]),
+      Retorno = df[[col_retorno]],
+      Activo = nombres[i]
+    )
+    retornos_list[[nombres[i]]] &lt;- temp_df
+  }
+}
+
+retornos_df &lt;- do.call(rbind, retornos_list)
+retornos_df &lt;- na.omit(retornos_df)  
+
+plotly_retornos &lt;- retornos_df %&gt;%
+  plot_ly() %&gt;%
+  add_lines(data = filter(retornos_df, Activo == &quot;IBEX&quot;),
+            x = ~Fecha, y = ~Retorno,
+            name = &quot;IBEX (benchmark)&quot;,
+            line = list(color = &quot;black&quot;, width = 4, dash = &quot;solid&quot;)) %&gt;%
+  # Líneas del resto de activos
+  add_lines(data = filter(retornos_df, Activo != &quot;IBEX&quot;),
+            x = ~Fecha, y = ~Retorno,
+            color = ~Activo,
+            name = ~Activo,
+            line = list(width = 1.5)) %&gt;%
+  layout(title = &quot;Evolución de Retornos Logarítmicos&quot;,
+         xaxis = list(title = &quot;Fecha&quot;),
+         yaxis = list(title = &quot;Retorno Logarítmico (%)&quot;))
+
+plotly_retornos</code></pre>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-a1526708f311e0fd726e" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-a1526708f311e0fd726e">{"x":{"visdat":{"4c0c42836a70":["function () ","plotlyVisDat"],"4c0c606b44e8":["function () ","data"],"4c0c551378de":["function () ","data"]},"cur_data":"4c0c551378de","attrs":{"4c0c606b44e8":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","name":"IBEX (benchmark)","line":{"color":"black","width":4,"dash":"solid"},"inherit":true},"4c0c551378de":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","color":{},"name":{},"line":{"width":1.5},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Evolución de Retornos Logarítmicos","xaxis":{"domain":[0,1],"automargin":true,"title":"Fecha"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Retorno Logarítmico (%)"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-4.1030895004098511,3.045997498708175,3.4101484406978244,0.091915294944833192,-10.13468061240701,5.0625286964313787,1.4979430501467661,0.71559369889531155,4.0613236594575497,-5.105554360538278,7.363506957917032,-0.39533797075765875,2.5469409410657562,9.0718799252339721,2.3883565401886742,1.5206971826671634,-4.085071735922341,0.55092535546741317,-1.9489427255260594,0.79300255999026348,1.3585475629199095,-3.0145281023688852,-1.6500046628612708,3.9779984834913407,-6.0259330223631835,-2.4681373595235812,3.883836465744217,-5.2989560150448867,1.6471301408380157,2.5445881827250716,-4.8956894251995564,-0.10537850770422352,-5.4239440541024919,2.0445123696758216,-6.1016452658940068,5.8755492987682345,2.4108855444845645,-0.40393607817694743,3.5121527087246918,-6.100470177009143,2.1381862693512943,-2.5075866955493353,-1.7780551073707684,4.7822953514613076,0.13944787875779241,1.0156190364137174,2.0867177633775214,-1.9168408503917433,-7.1302827829597959,-25.121293473894113,1.9974825403062724,2.4853648623027524,1.8830936784702601,-5.0191982197796747,1.330282684372186,-3.6961397531255713,-4.0160900463224181,22.45869352649148,-0.039623383078790653,-3.9951772287052378,5.8518179311036533,4.2255616848436262,2.7020902349962128,3.7178880327918051,-3.6475758850585294,-1.6631900594395788,1.9507123524377334,-0.57020039381754373,2.9284089935702085,-8.6745509357067263,4.8038216547910295,-1.1658507297966025,-1.5633317382336642,-0.40297835039648788,1.6336981709512699,3.066360921243394,-8.8883357095951965,0.70748190952389933,-3.3676669724133745,-6.8118335731565338,7.7005811941317504,4.9851947662217455,-1.6164547104466465,9.3318632006559099,3.9139777308690782,-1.740514679652172,0.092023716132239031,-2.0863226409730373,5.8246787339637507,0.50430323417121059,-1.4163998619924456,-0.82287144837138726,-4.4539052280242686,10.924330884559019,0.43550427198262298,-0.24182029741339761,-0.76100163688579414,10.193909760923958,-2.008359890225897,4.2177171891420784,-3.3983769543672437,1.1023007432218179,2.9993068936397194,4.0848956493272581,-1.738481742655118,-0.26850783677705437,-0.39851324308664005,6.4611318505971127],"type":"scatter","mode":"lines","name":"IBEX (benchmark)","line":{"color":"black","width":4,"dash":"solid"},"marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-12.157746619455745,5.7485666763485543,-0.50429796568267626,1.2691708778987731,-7.1085580522630032,6.0101525791502297,-4.6995654093643591,7.0218510997221095,-6.6828006952460939,-3.5335539667646021,1.6014424197074106,-1.4520726307303278,6.6681626430774799,4.664685830170523,4.0480892770033527,2.6271023462834275,-1.5431245723500187,-6.3184552005334904,4.815064052750273,-2.7536900184658375,0.13414383752095027,1.4102021666503095,2.2983251755205547,-2.4064769035972766,-3.9188591072647494,-4.6077832642334116,4.4387661078926666,-1.734732088282076,2.6297109754447767,0.59565687431026859,5.2070643087169799,-4.1381391617472119,-0.95586204366511218,2.6207006820324175,-0.28208417857329415,10.07156696357483,3.4650602019888677,3.0143301455370253,5.0430717284486448,-2.6299040651632133,6.6444526199989085,4.5166048713086937,9.3958157563248879,2.4438065276199961,-0.18878751158455387,1.8349138668196652,1.6048267005256189,6.0777275556020971,-10.203196231485157,-16.835446229706985,4.1644486034402739,6.8642019040312086,-1.672034783720644,-13.341096862015256,7.6103585280683728,-7.5621366782815613,-11.07296787380343,22.749487011642788,-2.118338345415971,-13.201536230152433,4.1296437691929366,7.4211897271356353,6.1497261803916015,1.6363014484158445,3.7491234136133311,1.0050236941001156,-1.9386641573832186,2.8544689127678602,7.7386494221953317,-10.430119016584216,12.63302442680283,-11.48393573408053,-0.61236576333665305,-1.1946596279828192,1.8884089550443406,-2.3869457981710696,1.9550260952212462,7.5229360682814939,-4.3093174178884031,-6.5767002761284221,5.4899502298364045,3.5384376280092944,-2.8024804138255366,9.9869490326581545,-2.9270427189811432,3.1117865337691342,4.8280324730951563,1.812528077353015,0.069050912904033979,3.9592307025382301,-2.1628190938183245,-0.96188011287692277,-1.8464093006348659,12.572300378356305,3.8905915007959813,6.9880739031164207,-2.1696381860599079,5.6933819703519628,-8.1770957366920527,7.0254445885971517,0.82266141493545497,1.3150991537335788,2.685439360540931,2.2013535403655915,-4.5064651312364479,5.6404870870823132,5.2417369974480543,2.0362106269987468],"type":"scatter","mode":"lines","name":"FER","line":{"color":"rgba(102,194,165,1)","width":1.5},"marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[5.3118934591286582,-3.1684839353633976,-2.9822133904006787,6.9641974635394899,-0.51692972497980882,-2.6083973581842113,-3.2127318956756579,0.99554982897309685,-6.294081591129963,2.6843548253162819,2.0332334007227892,5.8798513574301214,4.078166473020195,10.758606061215836,6.9920344419362568,2.1467462275810423,-2.6972190623471892,-2.6175251984968728,-0.021046255707179995,3.7194458787785489,8.6419433061590833,-9.2115091879161337,-0.3474065323844755,6.6392885670433444,-13.756448223718154,1.8864414367158133,1.4668068121067801,7.6246889409523622,2.2755159012324278,-2.8613284868947542,1.9131759964110984,-4.3160634891694194,3.761827728356959,-1.7217731641401279,-7.0429725005134447,-0.65716615420763347,0.48234018626138742,8.7885925291943945,-0.88532142902661981,-7.3797161574590042,12.347238640601388,12.555430818770219,-1.721207165234695,-6.3058073495844358,6.5831988336278346,7.1160417711913837,1.345313882139676,-3.0144764739603147,-4.3851821633115851,6.6691361320664555,0.19335899808359258,-9.9439688292546347,-3.9533767493339589,-9.0144062296770855,-8.3997916591760813,7.9534382440601181,-5.861858110442375,3.0322951411480226,0.54587501571683461,1.7435024498765106,-15.456216129221767,7.0016892488640181,0.98040330955706523,1.2340482542905207,0.043789053616860585,-4.675930837704545,-3.5607833439310177,1.8674248064860954,-6.2895392481268075,-22.352246950063126,6.3926330178164292,-7.7921488129536254,8.6183508582794666,-3.1947743832672515,-2.9558755404366366,20.243052695485318,-8.2704893377778532,-23.76649110863638,-16.599977461969928,-30.462287739319915,-3.1567114577054856,16.550647651175112,5.8798340995328768,11.850491133533492,-4.9883492354843462,-23.623276430793936,2.3009457672482636,15.154157409710889,7.9297640528636304,12.851461643268092,-5.4254526500564726,-2.8069262386620775,-14.975469772217131,20.281548329324075,17.567914453131863,-42.09515190158708,-29.094030138654013,9.4782616123233243,3.6273409142391078,7.5923877577983578,-17.123406854175638,16.801276749726668,7.4783762881329263,2.0252589179728275,0.19540138149007902,-17.316878320553862,5.9914291748263793,-9.7761853544378052],"type":"scatter","mode":"lines","name":"GRF","line":{"color":"rgba(252,141,98,1)","width":1.5},"marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-5.8038856931216465,-1.7421097407118724,5.687390873855902,-1.7561574343046393,-0.14775907131514554,0.94836211545377136,-1.5158736090718605,2.5436433599417052,2.561117571641347,-8.609559641184017,9.0113778243101841,-6.6315412300865351,9.4918241237958547,6.6439304946590783,-1.5481073685060354,7.2440557908145298,-2.3520208412922239,-3.957287806051335,5.5044152504894805,-4.3035142701699947,5.419528184590594,-3.9093639787719736,-3.2290499722171351,1.5056403226030524,-5.4673056660151653,-1.7264786316066427,7.1713022715777619,-5.5106863536923179,8.7011358875583653,0.39172329369190351,-0.78230659992220009,-1.3166339006514427,-1.3022238197797797,5.2012533849593812,6.2925024586270251,2.5602452707083279,4.2419117802859452,6.2479122149593724,3.4165462352329756,2.6323867346487617,5.2939798083276424,-2.2613165993216056,10.979050741431351,1.9484107369901249,-3.5001703004341023,-3.08801657105644,2.7834789003913452,7.2472481726118643,6.3461080067090503,-13.863865846973656,1.7215059815435474,5.8227779117258516,6.3195819537042563,5.6512161450730236,-1.2825458634436515,-0.37987108060630881,-3.7319522585300913,12.254518515765245,2.2035844099165036,-4.5015107714961644,-5.6736910395012607,5.2323786838492481,2.2503285194356071,-2.1593172888067613,-6.7240300204437276,-1.1741814308779741,5.6510467046780199,-18.941675982043591,16.237507394672424,-3.0918499888068496,4.9828239878113578,-2.4308522165930047,1.8682715309543685,-2.5871883466701995,10.425105359517994,0.22680258031364531,-10.89414607214052,5.2555610179620516,2.2519513181900042,-8.0476151887313385,6.9827565354071197,4.7978679325330287,1.3818830742194255,-1.7070864813099274,2.752241610262951,5.5495028652771339,2.5361399970230014,-3.278972284676307,4.711796895320175,-5.1073208471303033,-0.79902275442971238,-3.3870128104941166,-0.90069313730887224,7.7401897446629064,4.5236948366218943,-6.0335047703716338,-3.3956197652537767,7.917301198736526,0.13040487275297608,4.9989316936782657,0.12388020386464582,0.53510116709403199,8.0210650555914587,8.016271817980769,-1.7795946780232441,-1.1424631196960355,-1.4184564402886402,2.5242672686858647],"type":"scatter","mode":"lines","name":"IBE","line":{"color":"rgba(141,160,203,1)","width":1.5},"marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-5.3239290691457164,3.2485358325377245,-5.3137540314374565,9.001204746098157,-1.4933145773431633,3.3856873517499331,2.6315147180305587,3.814252863842027,-3.5627235950987046,1.8373005986596969,0.47910475051891055,-6.0210266342335839,-0.70660705381615507,8.5911615394622221,6.3611017614957799,4.2874192922087495,-7.9607725479935443,-0.059522986947380119,-5.1152159471589798,-0.094049663196660305,0.65644839124212595,-7.1223662977136559,-2.3646593009146955,-0.60432303963695588,-14.552842400440547,1.8654995742157343,1.3669305625670258,6.1394171318553514,8.0014148653215766,-4.2232855635568889,-7.3970646763660941,0.23003835963240071,-4.6246359155272643,8.9675093916371296,-19.233836904920132,8.5705557778054775,8.6121104853227326,-1.2893593963976713,2.8965559746641834,-9.8128694610525091,9.5121141850110114,2.1691171683301036,3.9533649110651936,0.99082333408184731,-1.5971936432586986,1.8779276652161059,10.695158566648066,-3.4943690846126696,-7.6618682396583981,-17.305079934699783,-1.7480725072468228,7.4568729235247044,-6.0898969898843358,-4.5570983060922998,4.4722024519938675,1.0559626115944187,-11.615611182311536,28.946645058391283,-6.7199070597011357,-6.1368938159013897,10.898804976744625,2.8516614586121314,5.2680342121851353,7.4958810102262685,-6.4517549189157641,-3.8426763886108439,1.1130614860150878,9.5907455526830443,-1.8395839813063475,-11.450714050103183,2.3764093195371316,-6.479557422386506,-12.491388171128825,-17.657529920909674,1.6048476525706956,13.105571526655302,-3.6384001534735866,9.2822694266552208,-9.467724104209907,-1.2607978499960204,7.511438442241225,8.7432993805681924,-0.04022529658782581,14.124794455825906,1.6288681268767924,6.0361706415930971,0.8379064574859818,2.3382443016877641,12.510659291343851,-1.8500539566721486,1.5676555148471216,-0.19816354050301577,-8.0822272838532605,15.626958004580205,4.1424562220214511,0.7076008637521447,3.2212858142577794,12.928569085528085,-8.5396069639599226,3.3562513889600964,6.229771832027664,-3.2890590794526275,8.7865572611089959,8.151789237515894,-1.5933562045248983,0.27435290695381198,-4.9902361064987133,6.019800366748651],"type":"scatter","mode":"lines","name":"ITX","line":{"color":"rgba(231,138,195,1)","width":1.5},"marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-4.735577250287248,4.4520311375399473,13.207839889575524,-1.8909830717930287,-22.425118374776698,10.115228480387383,7.2620674159952774,-1.8326063196158815,12.599712604016688,-2.6112535689565952,13.957041076651455,3.7598095008782639,1.1290877271787014,10.855695010685196,4.1260521310138465,-2.5881261946563816,0.19011574269793829,1.3468176452150038,-5.6099737863280374,8.9227939576511428,-1.4322176881569559,-2.4269830863078212,-2.949330722371335,8.7999727600396085,-4.4290640812210125,-6.7896774430713069,1.4623561138489283,-14.406450668725412,-0.17405658916047617,4.835431885419661,-10.326678395426047,1.1016590183341446,-3.2943641822085867,0.58632644108991272,-5.1985030050663239,3.9239943488562412,5.4013254394257748,-3.5902479996121395,8.484766553659572,-11.781887783462253,3.1997979511022123,-5.4775497485289648,-11.597265631540775,8.2677751557893373,-3.8883638233655926,0.95474110934778977,5.3129503774761888,-4.833467614593534,-6.6002775361146178,-40.546539462122645,-8.4882078230227531,0,6.5075235215441118,-18.424550360522694,2.9527112412388146,-15.232680812880716,6.7207592238578027,38.833226434365926,4.8642524846845507,-4.9676923700032738,18.214895590346071,-0.017249485226156214,10.41515087113487,7.1618392397295283,-6.1583418595719808,-4.1864275310126375,1.2872311402371439,0.28733830309338737,4.3668296050077267,-16.028025928896305,6.6978790632842404,5.1046767803775488,-3.6194090458083639,3.7969836498733311,-9.5907073573780703,8.6396531842279032,-11.463648046533169,-9.6799386972043386,-0.94709244674937576,-0.81004404348415937,8.9510668894833163,10.573502213122731,-1.6982482886674366,13.357604790533861,15.030750365167833,-8.300206664733544,-7.2470313836171085,-2.7193923222396776,10.585290487543286,8.4509539724524796,-2.2374127705901525,0.45703509721151114,-4.3058443047985007,11.521673709217373,-0.56724951528039913,-1.1709977784699843,2.9021882912616759,16.194012584791295,1.1325692721551484,7.5388166268346213,-11.009452974717071,2.8343915450030233,0.91610056546693741,2.2976993244650856,-2.3866975626820386,-0.37689234589490805,2.0136337972944007,10.605474554870554],"type":"scatter","mode":"lines","name":"SAN","line":{"color":"rgba(166,216,84,1)","width":1.5},"marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-01-31","2016-02-29","2016-03-31","2016-04-30","2016-05-31","2016-06-30","2016-07-31","2016-08-31","2016-09-30","2016-10-31","2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-4.5880566015723323,6.3699833291465779,-3.4069781374599595,-1.3853150531793368,-6.1888223980094637,3.575959467229195,2.9443675964267557,-0.16625205297353673,2.6814185875275731,-16.493587409255106,15.777868348429557,1.1834534584956868,7.7998118251064508,8.3091335458101554,-3.1979699757266555,-2.401828079439694,-9.2509870719379439,7.6291565939257344,-5.3829025036959521,1.4574847891143605,-2.0442381257119946,-4.5547886741055255,-5.7397475114271623,3.9177952371327818,-3.2010718667207172,0.43694153727200646,4.9217085568681984,-11.100232241340047,-3.6156805647399093,8.1440653245895778,-9.5999503197769176,-2.4485003732924504,5.9778806302902998,9.1055768630636145,-7.7198273612203216,4.6918333805189505,1.2463659017794892,-1.593872261080076,-0.49659496136733594,-3.4774253092379137,0.59725498856928461,-1.4974002355952143,-9.3851898647919754,10.534439325655542,-1.8161009847752929,1.1137667352530523,-11.013463550365543,1.0495883649702442,-13.079919321569534,-25.020909612267552,0.15561723819103035,1.448796284560705,0.14137580907123137,-13.823236851524934,-6.913380371061284,-11.986159151922527,-4.5628780212110254,26.488326152182694,-11.952782794530204,14.251059926002608,-0.7909552359695593,7.9300695963252839,0.95170570828188028,4.2299954169922938,-1.9847172064899388,3.1293796892391645,7.84496220601405,-3.2694109469034283,-7.2360816908713765,5.9803869933020115,-3.6826431754866773,10.705705665944709,3.5103936595508145,2.5969474716804442,5.4217170093893374,8.8161890834985037,-3.9916660027804696,-7.9980863155703741,-5.6901856967645825,-19.8190320530103,3.1776487535473352,2.8290387468072886,-5.7404480441842543,7.3982096861433977,9.8771553845491624,3.1708107358150883,3.7544586513282852,-3.8299965272570624,-6.6118199310376768,8.2206859159445145,-1.3764767098795261,1.1440762495685597,-5.9107031651933761,8.1097026138570616,-11.229729111060195,10.270096066335931,0.60822370166553341,7.5143271124310074,2.821152831786411,1.8608490454522508,-7.8876476866722056,9.062384842443393,-2.0549567506854105,7.1172578391552666,-1.882942243884056,-0.65117642280458909,-8.4934789472734131,3.5023730152358379],"type":"scatter","mode":"lines","name":"TEF","line":{"color":"rgba(255,217,47,1)","width":1.5},"marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p><br />
+El análisis visual confirma los hallazgos estadísticos previos porque
+todas las series presentan volatilidad persistente durante el período
+completo, con intensidad variable entre activos.<br />
+<br />
+Se observan una relación entre la volatilidad que se sincroniza con
+crisis macroeconómicas, junto a eventos atípicos específicos (pandemia).
+Los patrones de valores extremos y asimetría visible son consistentes
+con la no normalidad, sesgos distribucionales y colas pesadas
+identificadas en los tests estadísticos previos.<br />
+<br />
+</p>
+</div>
+<div id="estadísticos-descriptivos" class="section level3">
+<h3>Estadísticos descriptivos</h3>
+<p><br />
+Se decide hacer una tabla que resuma los estadísticos descriptivos
+imprescincibles, para entender el comportamiento que tienen las medidas
+centrales y de dispersión.<br />
+<br />
+</p>
+<pre class="r"><code>tabla_stats &lt;- data.frame()  
+
+for (i in seq_along(datasets)) {
+  df &lt;- as.data.frame(datasets[[i]])
+  
+
+  col_name &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)
+  if (length(col_name) == 0) next  
+  
+  retornos &lt;- na.omit(df[[col_name]])
+  if (length(retornos) &lt; 3) next  
+  
+  stats &lt;- tibble(
+    Activo    = nombres[i],
+    Media     = mean(retornos),
+    Mediana   = median(retornos),
+    Min       = min(retornos),
+    Max       = max(retornos),
+    Desv.Std  = sd(retornos),
+    Skewness  = skewness(retornos),
+  )
+  
+  tabla_stats &lt;- bind_rows(tabla_stats, stats)
+}
+
+tabla_stats %&gt;%
+  kable(&quot;html&quot;, digits = 3, caption = &quot;Estadísticos descriptivos de retornos logarítmicos&quot;) %&gt;%
+  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Estadísticos descriptivos de retornos logarítmicos
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Activo
+</th>
+<th style="text-align:right;">
+Media
+</th>
+<th style="text-align:right;">
+Mediana
+</th>
+<th style="text-align:right;">
+Min
+</th>
+<th style="text-align:right;">
+Max
+</th>
+<th style="text-align:right;">
+Desv.Std
+</th>
+<th style="text-align:right;">
+Skewness
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+IBEX
+</td>
+<td style="text-align:right;">
+0.314
+</td>
+<td style="text-align:right;">
+0.470
+</td>
+<td style="text-align:right;">
+-25.121
+</td>
+<td style="text-align:right;">
+22.459
+</td>
+<td style="text-align:right;">
+5.240
+</td>
+<td style="text-align:right;">
+-0.351
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAN
+</td>
+<td style="text-align:right;">
+0.578
+</td>
+<td style="text-align:right;">
+0.522
+</td>
+<td style="text-align:right;">
+-40.547
+</td>
+<td style="text-align:right;">
+38.833
+</td>
+<td style="text-align:right;">
+9.447
+</td>
+<td style="text-align:right;">
+-0.291
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ITX
+</td>
+<td style="text-align:right;">
+0.680
+</td>
+<td style="text-align:right;">
+0.914
+</td>
+<td style="text-align:right;">
+-19.234
+</td>
+<td style="text-align:right;">
+28.947
+</td>
+<td style="text-align:right;">
+7.575
+</td>
+<td style="text-align:right;">
+0.120
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IBE
+</td>
+<td style="text-align:right;">
+1.062
+</td>
+<td style="text-align:right;">
+1.165
+</td>
+<td style="text-align:right;">
+-18.942
+</td>
+<td style="text-align:right;">
+16.238
+</td>
+<td style="text-align:right;">
+5.549
+</td>
+<td style="text-align:right;">
+-0.365
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GRF
+</td>
+<td style="text-align:right;">
+-0.700
+</td>
+<td style="text-align:right;">
+0.339
+</td>
+<td style="text-align:right;">
+-42.095
+</td>
+<td style="text-align:right;">
+20.282
+</td>
+<td style="text-align:right;">
+10.409
+</td>
+<td style="text-align:right;">
+-1.004
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FER
+</td>
+<td style="text-align:right;">
+0.915
+</td>
+<td style="text-align:right;">
+1.724
+</td>
+<td style="text-align:right;">
+-16.835
+</td>
+<td style="text-align:right;">
+22.749
+</td>
+<td style="text-align:right;">
+6.081
+</td>
+<td style="text-align:right;">
+-0.201
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEF
+</td>
+<td style="text-align:right;">
+-0.238
+</td>
+<td style="text-align:right;">
+0.148
+</td>
+<td style="text-align:right;">
+-25.021
+</td>
+<td style="text-align:right;">
+26.488
+</td>
+<td style="text-align:right;">
+7.639
+</td>
+<td style="text-align:right;">
+-0.094
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+Los resultados obtenidos eran esperables. En general, ya que cada activo
+representa una experimentación de esto individualmente, hay una
+tendencia a la dispersión y poca centralidad en los datos. Existen
+diferencias significativas entre algunos activos entre media y
+mediana.<br />
+<br />
+Una caractericia común en todos los elementos son desviaciones típicas
+altas (&gt;5 puntos, aunque justificable por la naturaleza de la renta
+variable como activo financiero). Se vuelve a confirmar que, en algunas
+distribuciones de los datos, existen asimetrías inclinadas hacia valores
+negativos (salvo el caso de Inditex). Finalmente, la media y la mediana
+desvelan retornos modestos para la mayoría de activos e incluso
+negativos para Grifols y Telefónica.<br />
+<br />
+</p>
+</div>
+<div id="volatilidad-móvil-12-meses" class="section level3">
+<h3>Volatilidad móvil (12 meses)</h3>
+<p><br />
+En relación a los descriptivos obtenidos, se implementa un análisis de
+volatilidad móvil (12 meses), calculada mediante la desviación estándar
+de los retornos, para evaluar la evolución del riesgo sistemático de
+cada activo en el tiempo, comparándolo visualmente con el índice
+bursátil IBEX 35 como benchmark.<br />
+<br />
+</p>
+<pre class="r"><code>datasets &lt;- list(IBEX = ibex_mensual, SAN = san_mc, ITX = itx_mc,
+                 IBE = ibe_mc, GRF = grf_mc, FER = fer_mc, TEF = tef_mc)
+
+df_long &lt;- purrr::map_dfr(names(datasets), function(activo) {
+  df_xts &lt;- datasets[[activo]]
+  df &lt;- data.frame(Fecha = index(df_xts), coredata(df_xts))
+  
+  ret_col &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)
+  if(length(ret_col) == 0) return(NULL)
+  
+  # Usar nombres explícitos de paquetes
+  df &lt;- df[, c(&quot;Fecha&quot;, ret_col[1])]
+  colnames(df) &lt;- c(&quot;Fecha&quot;, &quot;Retorno&quot;)
+  
+  df$Activo &lt;- activo
+  df &lt;- df[!is.na(df$Retorno), ]
+  
+  return(df)
+})
+
+df_rolling &lt;- df_long %&gt;%
+  dplyr::group_by(Activo) %&gt;%
+  dplyr::arrange(Fecha) %&gt;%
+  dplyr::mutate(RollingVol_12m = zoo::rollapply(Retorno, width = 12, FUN = sd, fill = NA, align = &quot;right&quot;)) %&gt;%
+  dplyr::ungroup()
+
+plotly_volatilidad &lt;- df_rolling %&gt;%
+  plotly::plot_ly() %&gt;%
+  plotly::add_lines(data = dplyr::filter(df_rolling, Activo == &quot;IBEX&quot;),
+                    x = ~Fecha, y = ~RollingVol_12m,
+                    name = &quot;IBEX (benchmark)&quot;,
+                    line = list(color = &quot;black&quot;, width = 4, dash = &quot;solid&quot;)) %&gt;%
+  plotly::add_lines(data = dplyr::filter(df_rolling, Activo != &quot;IBEX&quot;),
+                    x = ~Fecha, y = ~RollingVol_12m, color = ~Activo,
+                    name = ~Activo,
+                    line = list(width = 1.5)) %&gt;%
+  plotly::layout(title = &quot;Volatilidad Móvil 12 Meses de Retornos&quot;,
+                 xaxis = list(title = &quot;Fecha&quot;),
+                 yaxis = list(title = &quot;Desv St&quot;))
+
+plotly_volatilidad</code></pre>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-0a7d53368c5125e7dc97" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-0a7d53368c5125e7dc97">{"x":{"visdat":{"4c0c2a6b55b7":["function () ","plotlyVisDat"],"4c0c52473e30":["function () ","data"],"4c0c7ed9741b":["function () ","data"]},"cur_data":"4c0c7ed9741b","attrs":{"4c0c52473e30":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","name":"IBEX (benchmark)","line":{"color":"black","width":4,"dash":"solid"},"inherit":true},"4c0c7ed9741b":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","color":{},"name":{},"line":{"width":1.5},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Volatilidad Móvil 12 Meses de Retornos","xaxis":{"domain":[0,1],"automargin":true,"title":"Fecha"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Desv St"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[4.892072841689175,4.7012106254126751,5.230134531597848,5.2047408084501079,5.1876530105335741,4.136407074663035,4.0420108407023685,4.1761859530029195,4.1751085700965076,4.0903426310262905,3.8352036096060171,3.4083985240267443,3.5247389630536303,4.0091647847487772,2.9411060659891666,3.1114014999206621,3.307034038804094,3.2598649060198888,3.3771576101761647,3.5911160314541726,3.5650130517261722,3.7195521912340954,3.8059207570889715,4.083880473146996,4.3378529498230778,4.1636640811593502,4.1169150023209458,4.0836878567143255,4.1774772909077225,4.2018620976462877,4.1352653885254149,3.9480077125249351,4.2380179920879675,3.8967221243540608,3.8668754361591953,3.32957322768734,3.0233425727039265,3.6101038496332953,7.9657073502099953,7.8719607907271838,7.924758262231391,7.9130287252326443,7.9605943374337418,8.0263905158875311,7.7476809274719809,7.7038205158210475,10.646818094323075,10.604363453390338,10.630534843313756,10.673938361715329,7.3672030498946253,7.3703752360528005,7.3861088872492466,7.5722370220920263,7.3623513905307565,7.3598913111304238,7.1938883041184489,6.9182162504031046,4.1839963379303384,4.384219582779231,4.1840399832651523,3.920946675492492,3.7170593784848713,3.6552850984629042,3.5958132830622422,4.2932400089499847,4.3000359483395769,4.2969219101896767,4.6119643718008509,5.1953082507458435,4.8661144100080147,4.6448110358777503,5.4261256357523084,5.4762937973730672,5.5176660611755883,5.5129843968008423,5.5053043818443852,4.9067051495616356,4.9097034257710916,4.7679236758537646,4.0754742721678916,4.0553788300987712,4.8623586730738371,4.7766698783728136,4.1455332593400263,4.0563877939239195,4.8389206552584358,4.9322003612564931,4.8692894231650046,4.9153734022874644,4.9118399726954562,4.867497667432013,4.8593293572969998,4.5911237930988005,3.6964532988661101,3.7202692710679499,3.9862283396347138],"type":"scatter","mode":"lines","name":"IBEX (benchmark)","line":{"color":"black","width":4,"dash":"solid"},"marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[5.9168197008558465,5.2020256306565038,5.1085568881466044,5.2136813046949362,5.2429824211439904,4.7014972145303036,4.9040526351708014,4.8080739150023248,4.5128217912818078,3.9666155949580895,3.7314329849096559,3.7443545208658042,3.8156489008970582,3.6404111207483916,3.6031594785630956,3.6496319294016311,3.5265956958855997,3.65529832256437,3.1673253127888743,3.2222027486166547,3.3559763771471869,3.3665234932903125,3.4333136867432432,3.3563869931666668,4.3889973506024393,4.1755398925615221,3.7271717300893492,3.7658549766524407,3.8570894150126294,4.0793351477043203,4.0797515067251213,4.4726549435328673,3.8724827207363028,3.7957928871482221,3.8223423495957003,3.6839483163314268,3.212995224498266,5.0810892560040886,7.4873190656602766,7.4445421020564959,7.577014797920925,7.428605290601344,8.3222327601497916,8.1368584931783463,8.266864929448845,8.661238517204314,11.347011857412605,11.321139693028071,11.548043697733613,11.463207236841209,10.660357432926105,10.740363491876174,10.563152587097331,10.59817719804261,9.6610984197355343,9.5230176670662718,9.1476853643103748,8.3191332412723344,6.626125871616531,7.4023005752364908,7.0958603311608401,7.09580848515645,6.8815133796524472,6.6900135683680491,6.7278912897527103,6.6602792188220405,7.0062726482132627,7.1152601596457785,7.3308298934320533,7.1287723506819383,6.4944598110892402,5.3000251632339257,4.9592850821842909,5.0731705485211123,5.0677978273152222,5.1736423957970903,5.030367188198908,5.0545725529834389,4.7747954934621557,4.5798021478229645,3.9151815431304957,3.8925781426995272,5.0489722080418238,4.8181677201491793,4.470782194930659,4.3927201444538273,4.4872022426630318,5.4084411546530493,5.6285257221267733,5.6082973886789071,5.5820401619044482,5.4334755073940473,5.3356416536538394,5.5858041494520982,4.7261753298825466,4.7964935108754325,4.523915014760103],"type":"scatter","mode":"lines","name":"FER","line":{"color":"rgba(102,194,165,1)","width":1.5},"marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[4.2362607494038098,4.120229308156782,4.9298852815526271,4.9496517160169802,4.7285195232078925,4.8700771603768613,4.8708169735257218,4.6589798032877479,4.6722015113077822,4.1585544689287008,5.547792638875662,5.6072813918250581,5.6557199872268979,7.2703112708438011,6.5908695750790889,6.2509643455686588,6.6376074946164456,6.6015031927918475,6.612420125323009,6.6220068992472463,6.6910762423939376,6.2517091123381983,5.6367970895699226,6.0160182433016303,5.6003977875883679,3.8873338447770154,4.5994219664937095,4.6189401814849775,4.5791345153202494,5.8953428569638788,6.7803876310533555,6.8405304449681816,7.008041363501988,7.1542486670876855,7.2740073493705735,6.7080651333862233,6.8480231043791902,7.1168067229788718,6.9599414994008875,6.9274413378518496,7.2739677076404963,6.6146811497189759,5.9131278567351151,6.25374911816533,6.6856362791126713,6.4061999088369843,5.985634029936735,5.9479503844461403,6.0451729377473651,7.2105395750510644,7.2503832930064567,7.282228095571484,6.9675496132728014,6.9446441187349306,6.6144268063501679,6.2594837832117802,5.7288392865963829,5.7624418356315648,8.2282031854106545,8.6359695607434386,8.6230177579554823,8.3989200203206291,7.9600443645450705,7.8891339349251206,10.296767306105298,10.487970146542809,12.257388741399037,12.835170353312311,14.641205045523886,14.686823571771956,15.258363516105742,15.228217833844253,15.7983413940654,15.443000267859839,16.525678769712592,16.65229269156788,16.017491590646383,16.388542146753657,15.68152062345589,14.955204180845623,11.497137626580912,12.507221434040796,12.947879813246576,13.682141377441614,18.520238648348485,20.168647082726235,19.414933346441767,19.437558103723372,18.997070689855153,19.270519406126819,19.603146655908574,19.811667920692326,19.841508750715715,19.385440403170115,18.790759808467051,17.891782649127663,13.61907121041803],"type":"scatter","mode":"lines","name":"GRF","line":{"color":"rgba(252,141,98,1)","width":1.5},"marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[5.0921161856349242,5.5271686829854731,5.7011786511100926,5.6019905508636585,5.8103351387576927,5.9069267206201337,6.1133822793636474,6.1786252112025544,6.4015942753536867,6.5135963475108092,5.9813965613051625,5.6595607577762213,5.1676744613473291,4.8247925851696811,4.3820788761065881,4.8974423026123404,4.594537775197443,5.3274671263111504,5.1784024183708022,4.9245106971305628,4.7682146584806304,4.4726592625510033,4.6045111198416473,4.7583412660433178,4.7762900496516325,4.3504472277508839,4.3395975994783633,4.1140989426157244,3.2894738218480297,2.8759274831533497,3.1607186327632291,3.802454649279718,3.5338903879280816,3.8624231635434807,4.2676106667667586,4.1318555046670165,4.3434034363228475,4.4397210663012583,6.4934460680970743,6.4662132722172876,6.588029323339966,6.6464315071854481,6.6096076272596171,6.083539390210932,6.0995529071654024,6.1159554984680273,6.7274053903314854,6.7265406516915736,6.8049400477979587,6.8915698837903339,5.3322733607382746,5.3322212214009532,5.3116893283372999,5.5319908014109247,5.2722547781627167,5.5293138330150287,7.8409383922969944,9.2625905495684311,8.5035710682961394,8.632387911755842,8.569067203891084,8.4294955836199854,8.3014608345467185,8.8648630712083474,8.8345426687613759,9.2128782977054158,9.3232571268360118,9.205358844899175,7.5209766767329285,6.1944110677766213,6.2074201262015416,6.0869011927266508,6.0558164017397251,6.0749469375590515,6.1039727677228202,5.455229443562728,5.5882038684928999,4.3381570934541198,4.6375546865249175,4.6503959877312164,3.9908412734622978,3.5806498910067397,3.977087208880155,4.1203587767997529,4.5506216917631379,4.642757863829174,4.9329559078639074,4.8859019273785265,4.9377322110034552,4.788292191552614,4.4547093824134638,4.849254646126651,4.8812190343507265,4.9453448512867935,4.7619246242294286,4.764882260095713,4.1650958166756524],"type":"scatter","mode":"lines","name":"IBE","line":{"color":"rgba(141,160,203,1)","width":1.5},"marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[4.6247585109780278,4.3020728518027589,4.8426347329362001,4.614511259799901,4.1433867122739558,4.9325784637803247,4.8871643163628713,5.1299497305033119,4.9994021656582852,4.8856903544676413,5.2794655062473863,5.2924550570415985,5.0307972953658133,6.4959674287583784,5.7990916895414975,5.2974131121602017,5.5340245088418332,5.9572330918599272,6.0190321134906055,6.1830459967460794,6.1905792339235983,6.2109923906681566,6.7075237009485287,8.609205531536178,9.1362223886009044,8.4924046741680002,8.5015192954143934,8.5283242712344922,8.8169673633108854,8.9632474138395803,8.9213906336952586,8.6777029615191896,8.6757062937025005,8.5436948951198595,8.1914459448571382,5.8366423144144859,5.8380315376394689,6.0592730327515056,7.9902445158592847,7.9150742432841712,7.742106687333294,7.3748477236472256,7.3763093656021299,7.4123355655880783,7.4142798947847171,7.9799942761411984,12.042447981028817,11.682047424851685,11.749041475718414,12.103265143114461,10.832175388880639,10.826271019502862,10.828014183436858,10.853538949101225,10.815441955369382,10.794318305497175,11.012247034474203,10.194940447371254,7.2471951979696749,6.9423449543967086,6.974205418886454,7.1595242194444895,8.4481034705620992,8.1897757419756747,8.9762326691556069,8.9058520815237898,9.5072466015649297,9.7433668519219978,9.0207326008428268,9.5344055400738341,9.5700256380968867,9.5247767017383609,10.256391623595674,9.3615822863797913,7.0541549932500427,7.0809469913382017,6.4644941649908718,6.6337989602773897,6.6602585951843514,5.3513417707627911,5.2581132345638224,6.2599290416877054,7.0820170160940306,6.9829863043485867,6.2612638210223022,6.2478367571064348,6.8344269955963428,7.6697579880575981,7.6690385910728116,7.154209809891853,7.2438954807570148,7.4731313166548397,7.5460485845011736,6.8311814160058564,5.8526801988239221,6.251615779212405,6.3313451868473587],"type":"scatter","mode":"lines","name":"ITX","line":{"color":"rgba(231,138,195,1)","width":1.5},"marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[10.319869818777258,10.073999821445213,10.316305442748614,9.8773526657589219,9.9102196918780869,6.0708195006285974,5.8909630454469877,6.3964339623772259,6.4198432019873124,5.9391523375250106,5.9244748417479736,4.9266428301557337,5.3538767817304151,5.6402416852950648,5.1855109708491156,5.0366567441239578,6.4485026431487853,6.4409683481999789,6.6550271546205302,7.0668053970495182,6.3330468932589898,6.3345912406288072,6.3921571180876331,6.4510062068347702,5.8085231173867369,6.2247557250141163,6.0630049421314505,6.6955626716325387,6.2476585607341493,6.3551458435628909,6.2564952300169328,6.4293989289263616,7.0023321778848713,7.0226894832914173,7.0309241646273692,7.106765971537115,7.1094554035745379,7.0017962346804774,13.224859447214291,12.5568381136583,12.548988361177662,12.786927409207665,13.361218274560867,13.47780179203883,13.092572191884031,13.657289166368846,18.809530791306692,18.792339132905177,18.793664381551501,19.689221240810529,15.219700631172426,14.945747438678877,14.907667901995559,15.217269013545938,13.827225402185636,13.856693183670368,12.478311618969467,12.485101564026388,8.8095627208399936,8.8930792691372513,8.7085077401141149,7.2274334416631341,7.2889805634047908,7.1668621355507662,7.3289743496083402,7.825850791457805,8.1679941395372442,8.1194422552026335,8.0990944619929657,8.521789149796211,7.8553475222796365,7.637398217758693,8.4710341524399446,9.2924080711146271,9.7461508285315297,9.5319987967828688,9.3054641138340077,8.9141381233907016,8.2159703003550941,8.2913996418953086,8.2371703714854245,8.3666618224058329,8.4522072864711344,8.4043726879925398,7.7735917116189555,6.5669258087961175,7.3090356934597391,6.6473071726817743,6.4520597290320847,7.4466460329108397,7.2049430354542388,7.0953698335183759,7.0740435861570647,6.9299435534992053,6.35149154390355,6.3177969240178058,6.7259012086435552],"type":"scatter","mode":"lines","name":"SAN","line":{"color":"rgba(166,216,84,1)","width":1.5},"marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[7.7723397527426128,7.9250621574909834,8.0618204972181537,8.0511357198666715,8.0865005859868671,8.3821197307617261,8.579240705885395,8.7631752451915261,8.7638043873875162,8.7716651263530458,7.2391404912333179,5.8529944306930561,5.9770848462026747,5.4436256542328714,4.6021404265793171,4.9699133024020554,5.7385245199132511,5.2966679140162638,5.3782713825777968,5.784817074530328,5.6972740964005038,6.1534287047458855,6.7522098918117051,6.9202179802244395,6.9678890686367572,6.9215825189170284,6.9348315671789793,6.7473228768874129,5.9866359222794783,5.8767046603475404,5.352787186721236,5.3196136813466843,6.1276789921662944,5.9230204280608136,5.215032723580399,5.6863123856051763,5.4516262261750423,6.3543699861651559,9.0876741195425375,9.1148838015928106,9.2659628149606732,9.2467203407849219,9.6266113619436098,9.5497955109820243,8.4144305343755477,8.307802711395583,12.630453805591797,12.675564811105732,13.759537807619141,13.45497037817649,11.741922336836302,11.744931828826322,11.801305986665911,11.820343838208439,10.981377734853744,10.76981355913238,9.9445220169770874,10.169493610883258,7.2111893153350133,6.1103711095446318,5.53778814193016,5.4807554952203059,5.1952678627916029,5.2807923850879721,5.5922643311344569,5.7707260837273742,6.5051481588646825,6.4894007300593834,8.7217494249640719,8.5558054379263062,8.3997828748655508,8.4946158891239847,8.1438517500631669,8.6417181704079233,8.6605339576870204,8.5748809798721712,8.1102913336730662,8.2207730175306111,8.4085713679147656,8.2465247657601566,5.3621688341501583,5.7806994737908735,6.1173817953502905,6.8685383387963022,7.1535903273031467,6.6239633820103858,6.8947279505835315,6.8646590309439706,6.7097340270228933,6.8547791920373484,6.9371977342599296,6.963256031769399,7.1699224262305972,6.8697515090707331,6.6255929723462001,6.1879743218751191,5.5986995330731002],"type":"scatter","mode":"lines","name":"TEF","line":{"color":"rgba(255,217,47,1)","width":1.5},"marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p><br />
+El gráfico revela como la volatilidad de la mayoría de activos se puede
+agrupar en patrones cíclicos, dependiendo y coincidiendo las etapas con
+eventos macroeconómicos diferenciados.<br />
+<br />
+Previo al año 2020, no existen períodos prolongados con volatilidades
+excesivamente altas, por lo que se podría considerar un período y
+estable dentro del contexto concreto.<br />
+<br />
+Con la llegada del episodio anómalo, existe una crecida generalizada,
+donde el caso más llamativo es el de Santander, seguramente provocado
+por la pérdida de confianza repentina dentro del sector
+financiero.<br />
+<br />
+Tras la finalización de este período, existe un retorno paulatino
+generalizado hacia valores similares anteriores, salvo el caso de
+Grifols, lo que quizás refleje una incertidumbres específica lantente en
+el sector sanitario en el escenario internacional.<br />
+<br />
+</p>
+</div>
+<div id="correlación-con-el-ibex-35" class="section level3">
+<h3>Correlación con el IBEX 35</h3>
+<p><br />
+Para complementar lo anterior,se examina ahora la dinámica conjunta de
+los activos a través de correlaciones con el mercado. Este enfoque
+permite evaluar cómo varía la dependencia de cada activo respecto al
+IBEX a lo largo del tiempo, identificando patrones de períodos de mayor
+integración o divergencia con el benchmark.<br />
+<br />
+</p>
+<pre class="r"><code>rolling_correlation_matrix &lt;- function(datasets, nombres, ventana = 12) {
+  retornos_lista &lt;- lapply(datasets, function(df) {
+    col_name &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)
+    if(length(col_name) &gt; 0) return(df[, col_name])})
+  
+  retornos_combinados &lt;- do.call(merge.xts, retornos_lista)
+  colnames(retornos_combinados) &lt;- nombres
+  
+  resultados &lt;- list()
+  n_activos &lt;- length(nombres)
+  
+  for(i in 1:(n_activos-1)) {
+    for(j in (i+1):n_activos) {
+      par_nombre &lt;- paste(nombres[i], &quot;vs&quot;, nombres[j])
+      resultados[[par_nombre]] &lt;- rollapply(retornos_combinados[, c(i, j)], 
+                                            width = ventana,
+                                            FUN = function(x) cor(x[,1], x[,2], 
+                                                                  use = &quot;pairwise.complete.obs&quot;),
+                                            by.column = FALSE)}}
+  return(resultados)}
+
+datasets &lt;- list(ibex_mensual, san_mc, itx_mc, ibe_mc, grf_mc, fer_mc, tef_mc)
+nombres &lt;- c(&quot;IBEX&quot;, &quot;SAN&quot;, &quot;ITX&quot;, &quot;IBE&quot;, &quot;GRF&quot;, &quot;FER&quot;, &quot;TEF&quot;)
+
+preparar_datos_correlacion &lt;- function(datasets, nombres, ventana = 12) {
+  retornos_lista &lt;- list()
+  for(i in seq_along(datasets)) {
+    df &lt;- datasets[[i]]
+    col_name &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)
+    if(length(col_name) &gt; 0) {
+      retornos_lista[[nombres[i]]] &lt;- df[, col_name]}}
+
+  retornos_combinados &lt;- do.call(merge.xts, retornos_lista)
+  colnames(retornos_combinados) &lt;- nombres
+  
+  resultados &lt;- data.frame()
+  
+  for(activo in nombres[nombres != &quot;IBEX&quot;]) {
+    rolling_cor &lt;- rollapply(retornos_combinados[, c(&quot;IBEX&quot;, activo)], 
+                             width = ventana,
+                             FUN = function(x) {
+                            cor(x[,1], x[,2], use = &quot;pairwise.complete.obs&quot;)
+                             },
+                             by.column = FALSE,
+                             align = &quot;right&quot;)
+    
+    temp_df &lt;- data.frame(
+      Fecha = index(rolling_cor),
+      Correlacion = as.numeric(rolling_cor),
+      Activo = activo,
+      stringsAsFactors = FALSE)
+    resultados &lt;- rbind(resultados, temp_df)}
+  return(resultados)
+}
+
+df_correlaciones &lt;- preparar_datos_correlacion(datasets, nombres, ventana = 12)
+
+
+plot_correlaciones &lt;- plot_ly() %&gt;%
+  add_lines(data = df_correlaciones,
+            x = ~Fecha, y = ~Correlacion, color = ~Activo,
+            line = list(width = 1.5)) %&gt;%
+  add_lines(x = range(df_correlaciones$Fecha), y = c(1, 1),
+            name = &quot;IBEX (benchmark)&quot;,
+            line = list(color = &quot;black&quot;, width = 4, dash = &quot;solid&quot;)) %&gt;%
+  layout(title = &quot;Correlación Rodante 12 Meses vs IBEX&quot;,
+         xaxis = list(title = &quot;Fecha&quot;),
+         yaxis = list(title = &quot;Correlación&quot;, range = c(-1, 1)))
+
+plot_correlaciones</code></pre>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-3be997880132c217e0ef" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-3be997880132c217e0ef">{"x":{"visdat":{"4c0c5a702c37":["function () ","plotlyVisDat"],"4c0c33bf2102":["function () ","data"]},"cur_data":"4c0c33bf2102","attrs":{"4c0c33bf2102":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","color":{},"line":{"width":1.5},"inherit":true},"4c0c33bf2102.1":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":["2015-12-31","2024-12-31"],"y":[1,1],"type":"scatter","mode":"lines","name":"IBEX (benchmark)","line":{"color":"black","width":4,"dash":"solid"},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Correlación Rodante 12 Meses vs IBEX","xaxis":{"domain":[0,1],"automargin":true,"title":"Fecha"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Correlación","range":[-1,1]},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[0.55344765684839448,0.5532794536003014,0.4914787827882165,0.53244146363373113,0.54151627746262321,0.54308736457692841,0.37722388895551368,0.33483481492415434,0.26316163586160007,0.31118251197293428,0.47241616497854294,0.34180974823613286,0.3436996305366497,0.22778208271271361,0.32805814530235838,0.15454630462153399,0.21289391880743364,0.18253605489286062,0.22247537491738081,0.32915909005729238,0.1818102505336272,0.18767531236050231,0.20415492355745812,0.2742207794296686,0.27491545151291252,0.59924617971404126,0.55888317691314959,0.55537909731193036,0.56275409339981208,0.58328319172493792,0.6033278060889975,0.62562255912455755,0.61096361128304522,0.64145243011690145,0.55460881420461117,0.55797992021639586,0.45228338426238024,0.19357858970157507,0.54931426535092553,0.82409928213461003,0.82196214512651522,0.82487546271107348,0.79050559727502345,0.75686299598858031,0.80380000584799605,0.79322271188879112,0.76721378956282482,0.86977576743188589,0.86727925657016725,0.87142055288057063,0.87124621506445277,0.90663117526686221,0.90416057625365343,0.91676351867273065,0.86955993531867948,0.85568594799512909,0.87358771709708527,0.85326962963241071,0.8376729824053093,0.72733964801623852,0.75692044402745684,0.68660025786024093,0.70814889574722395,0.68213602811668317,0.6630564110835927,0.61689236506994294,0.50862387478919269,0.51394997196832104,0.56271578082432461,0.60205678769805904,0.59691723132921948,0.51225978980052789,0.43581936979997804,0.66596816794293001,0.59223609585008608,0.5625349946765853,0.5432546152692691,0.59313913235933446,0.64002687886526399,0.68478168100916914,0.66263724914965438,0.5382126208249105,0.53163561906558676,0.70323624483832547,0.67644477168259598,0.51449602670549099,0.65830868012665,0.66421671031498597,0.6740331324893265,0.70033343182501173,0.74605766024412168,0.75411797309650952,0.7446152742563098,0.72703243958204733,0.72907538333414235,0.52916106504816074,0.49846562262426819,0.54660518054534024],"type":"scatter","mode":"lines","line":{"color":"rgba(102,194,165,1)","width":1.5},"name":"FER","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[-0.36966767217760593,-0.35969579056957818,-0.24116160176184609,0.11573855939058036,0.16565326843861042,0.19911403229352789,0.23656449898667284,0.33247229567539943,0.36620944391644267,0.35724192391140691,0.5476218682174393,0.65243421334173568,0.77071375445324408,0.8212043494395006,0.86397169645996608,0.83595144393065413,0.76564007625203456,0.51410031228286046,0.50534632854341288,0.4584460956682887,0.40586726489479824,0.37175218250132391,0.22882459497038499,0.15536902013801032,0.26258707506038609,0.12213038538666905,-0.19139292498053576,-0.15005311496480522,-0.19559008399679501,0.18574665851956237,0.2415971052424889,0.17809801159325361,0.20456386054907411,0.073808189716923489,0.12660978466517039,0.15729154620076388,-0.063510882286602191,0.068734581097305056,0.23721694348539704,-0.083323211201383959,-0.069205414925985906,-0.21055297779503485,-0.34664742336088666,-0.32745185019984585,-0.34880489499831147,-0.29871115893553107,-0.34645412204202664,-0.13429431664833069,-0.14785689989241729,-0.15898254456016256,-0.25554799922315208,0.10140870124151581,0.10526789518265839,0.12544172427512479,0.10782199825302892,0.03926532568205883,0.032081249017085783,0.13256997293411232,0.061415883456508238,0.32614358339430899,0.39912950851906692,0.49988410260211674,0.67061045424549226,0.63334902540289217,0.61545954529708857,0.62899116822651691,0.64195287775391097,0.49654357937841637,0.52755031565447918,0.60947087381998422,0.57732267387632852,0.57023604120619709,0.51606136593027463,0.56682674122303256,0.59294449187997966,0.60046296068615024,0.59065268899593681,0.49537796006738849,0.56845870333426307,0.56009441551647343,0.52241486301495177,0.2818771488526351,0.50463511682729523,0.58427387965812672,0.55310651165588098,0.44425060548924789,0.46945536935582888,0.45431967171796395,0.4349470485804488,0.53107031590438802,0.54542633264096851,0.54553190390121031,0.55271973514237227,0.55864278602195183,0.50764370574105655,0.4225228989045634,0.44148280518678057,0.37513249269264082],"type":"scatter","mode":"lines","line":{"color":"rgba(252,141,98,1)","width":1.5},"name":"GRF","marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[0.64728989813356863,0.61830649115281511,0.55037658008007073,0.62574242421233861,0.6050364929689529,0.57296808684953215,0.71635526049806408,0.73752365199226055,0.65514175915774553,0.64678167785630025,0.63707034382345207,0.57635551900821924,0.50507456322738076,0.49751761499708991,0.582346189409091,0.44712503776919399,0.60228246709538757,0.63070429812792506,0.64318825576755212,0.66674774866904574,0.71528894040476365,0.77581431343017004,0.74342124628053396,0.75810368499875125,0.54564708866937706,0.5478883815673159,0.48641918783494065,0.45063642966619427,0.39166802044139021,0.21430194798814911,0.20024001045299689,0.29921675626397659,0.10977657989910324,0.064513566576147818,-0.1036930617888796,-0.13874626246393734,-0.0095009852018089879,-0.078896857388402533,-0.21108253435095342,0.59791487685027411,0.5881647268800333,0.61739604063912279,0.6181510635208024,0.59674946749367019,0.61788214755299387,0.63317186742536402,0.67278939657246017,0.78893363322370358,0.79017021723870473,0.80215508040803074,0.77432081377814355,0.5830221222744858,0.58321385939057224,0.56548847670945179,0.62008836310788551,0.76907682304176406,0.73164708955574886,0.60888042473233817,0.51465581383975001,0.33220411153649543,0.37612964552349626,0.35877659257074512,0.45728680755927864,0.42663259776163892,0.44053526234554208,0.47652247773726714,0.54654070610970795,0.55060038507479492,0.51463467211888392,0.7489292706161077,0.78060129875578077,0.80461929852941283,0.79204834275655089,0.60643090586618265,0.62192141141057078,0.57238241106025312,0.6122376804040407,0.6326454559232465,0.48428549216202449,0.48686564190264914,0.54661752723754631,0.37353677548817765,0.24986334287053949,0.43617454157280222,0.4156818177195748,0.58504578748758396,0.57761055828642194,0.77802899152756211,0.783956723566817,0.7769754665605465,0.73640584842360557,0.77716563793116067,0.7410193985480541,0.73633461528861655,0.74443765993183875,0.72935620323166983,0.75984587944444082,0.76373483311997759],"type":"scatter","mode":"lines","line":{"color":"rgba(141,160,203,1)","width":1.5},"name":"IBE","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[0.12626013685746657,0.13749459115060778,0.019815468084916261,0.21783149972287139,0.29667650632437298,0.37421916736615829,0.48684294209624973,0.47313869412350607,0.5193582793573509,0.54456692156862174,0.61416980120705889,0.79706191445455432,0.87969834978718497,0.86158218752033677,0.90054946263725166,0.81729074825614212,0.79187281098794182,0.44602771142230035,0.44309373368009269,0.37460456592557168,0.42713664810729951,0.42541322034782852,0.43240608246608575,0.47130043194752574,0.56969710963904507,0.66028022769698014,0.62410754563700388,0.63752208297298907,0.65519597901442861,0.83226897720572046,0.83350424227888731,0.86844069757611542,0.8375571801309194,0.78242017499696892,0.77867077378028504,0.77971601586231942,0.67473220671006029,0.65786685599671046,0.71784699122090079,0.83226476740835043,0.81051029769842498,0.82579638596865634,0.77007822921293601,0.78261139078247899,0.8007239009081446,0.79694521503294413,0.76075521016700176,0.88191380660924468,0.87872353141875259,0.87933311166059613,0.87811542031976075,0.89888086622186203,0.90182052372139254,0.90725694121471445,0.93544287567401985,0.93695898643982922,0.94087109620881115,0.91288590005185999,0.89925385979306904,0.78881468382309627,0.80093794337540281,0.77625268017669036,0.70188362635032375,0.5898511425814762,0.57172176669016828,0.56348555779951015,0.46771227007899707,0.46585104667690846,0.48154116184650042,0.44949847898167949,0.53978553687558728,0.52652601974321755,0.51933646922839993,0.61784463661062783,0.61803941373126869,0.73801474237394593,0.74526813276347192,0.75885121480022821,0.75565033041698948,0.77694471789792874,0.78919289094567513,0.78423232780575292,0.83500519084573488,0.87409861898815489,0.86691714711637924,0.83063632811256871,0.86535687292956154,0.92482641309979252,0.89816986397904119,0.90761131454965105,0.80883375505794042,0.79302771785965065,0.79432580638492767,0.79490644961780654,0.76425752055739826,0.66376177379781864,0.66848946601228532,0.67329082996695044],"type":"scatter","mode":"lines","line":{"color":"rgba(231,138,195,1)","width":1.5},"name":"ITX","marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[0.93487908047614743,0.93107793020054797,0.91545084069126392,0.89835751310600065,0.91025284875149626,0.89810187229944549,0.78228768603240917,0.77024790251615094,0.79479553412016235,0.76882154403739578,0.74985159404501101,0.75431430178033743,0.676124678259301,0.72724218465703816,0.76660099658218028,0.65895453813355875,0.60997848546521916,0.71864753847680696,0.76676839001496366,0.7822762315984888,0.80936974672185935,0.84873192380352935,0.82134160884605711,0.82871001126533206,0.81468041643518219,0.80358066922289806,0.8308579335890347,0.82500460281785615,0.83947191256048248,0.86476895067410542,0.87518698094574165,0.86962128213209133,0.79250890121444106,0.82495007223110806,0.85115996763554669,0.85230718097416858,0.89204765377650774,0.93196189286057751,0.86544323533733913,0.96503343816888665,0.93654491963572317,0.93591944242042968,0.92947130935418409,0.91619631581251437,0.92667312223639853,0.90998685964598836,0.85742968820164445,0.92509317453094209,0.92148261675929644,0.92116925294050089,0.92279487134870486,0.85842984459700933,0.87808330239418331,0.88368874950674781,0.88976910636668349,0.89507675947006871,0.89245855385891337,0.90637521944798272,0.94671799626711617,0.89036529676289666,0.90013407416845814,0.86687772149574005,0.86239842185972959,0.90569594483461391,0.77213163965480169,0.7664422843341534,0.7947633608006468,0.72472465514935369,0.70244941760713786,0.63758925891484308,0.68258595165253988,0.63290976163964063,0.60679761480473959,0.72140397748437401,0.71201431997229825,0.72090548823191614,0.7643141116130483,0.76329934835138735,0.73285663507336574,0.7637529435338547,0.76696998078080403,0.82079393056255678,0.83851747359405293,0.8158961495184136,0.81136913433905311,0.77383416604856536,0.77535527406522087,0.85687453701930094,0.90420421896559078,0.90261904994581765,0.86980193870849631,0.90956263191170661,0.89577476235372822,0.88783283683195524,0.88621515738998458,0.87918279443966862,0.86952010905759136,0.88592592566735462],"type":"scatter","mode":"lines","line":{"color":"rgba(166,216,84,1)","width":1.5},"name":"SAN","marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2016-11-30","2016-12-31","2017-01-31","2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28","2019-03-31","2019-04-30","2019-05-31","2019-06-30","2019-07-31","2019-08-31","2019-09-30","2019-10-31","2019-11-30","2019-12-31","2020-01-31","2020-02-29","2020-03-31","2020-04-30","2020-05-31","2020-06-30","2020-07-31","2020-08-31","2020-09-30","2020-10-31","2020-11-30","2020-12-31","2021-01-31","2021-02-28","2021-03-31","2021-04-30","2021-05-31","2021-06-30","2021-07-31","2021-08-31","2021-09-30","2021-10-31","2021-11-30","2021-12-31","2022-01-31","2022-02-28","2022-03-31","2022-04-30","2022-05-31","2022-06-30","2022-07-31","2022-08-31","2022-09-30","2022-10-31","2022-11-30","2022-12-31","2023-01-31","2023-02-28","2023-03-31","2023-04-30","2023-05-31","2023-06-30","2023-07-31","2023-08-31","2023-09-30","2023-10-31","2023-11-30","2023-12-31","2024-01-31","2024-02-29","2024-03-31","2024-04-30","2024-05-31","2024-06-30","2024-07-31","2024-08-31","2024-09-30","2024-10-31","2024-11-30","2024-12-31"],"y":[0.77512774350344482,0.77052029454244464,0.75784791909643923,0.770262194111069,0.78573699717174361,0.77682243266442297,0.87273554962291588,0.8289368791088092,0.83989981772659394,0.8374843838550281,0.83810114516591672,0.79776762227673792,0.73474723477738979,0.76343749657449644,0.73548767238457569,0.54107305562835173,0.6755269491002267,0.76264977971821635,0.68578295033563375,0.7503035515502825,0.78369306345717282,0.77587704114894041,0.55958429004863908,0.58821712896152212,0.64349795503547214,0.64295920545326146,0.63962718734953272,0.64905633598260393,0.59724801371582548,0.53106346945098071,0.57027591031164926,0.54260398745094329,0.44704293355289298,0.54999599561251677,0.74123347846982712,0.77856296658705915,0.53302438769728577,0.41505014251080091,0.58030049632406855,0.82155436270724513,0.82529622007593262,0.84264542042225654,0.84201985402824031,0.83766715117250645,0.83085621935459575,0.82843015799349462,0.81926628140800584,0.91193068319203985,0.92045327654937092,0.81836508047582535,0.80604968022184686,0.72885575849867523,0.72902182690482142,0.73037335284321148,0.72378683558400425,0.67994969478043388,0.68688369335030885,0.67112026744912134,0.6095236823977721,-0.2036209943367126,-0.33495280084569767,-0.22603129493198112,-0.18972225342149776,-0.32607443622497739,-0.28240585543209462,-0.20757226953427729,-0.019084977563805058,-0.056136484601158908,-0.058976944444233945,0.21080996435453533,0.31642040071682792,0.49371899572777184,0.56626352233971111,0.68714482204659155,0.72430123031469384,0.7073271147716943,0.69997037887149194,0.70340487164851184,0.6667815936028727,0.62256279124672298,0.59957474173379044,0.33177254321335142,0.43969614341687013,0.52982990754735204,0.45845554511898434,0.31102956273227783,0.24781772709940708,0.38827734689787274,0.37483361548449323,0.34427233804573981,0.54581594350744456,0.55085256332441557,0.51999663220169312,0.53890969418768608,0.49067234858452258,0.427464051825238,0.47930014325636439,0.60215827017765045],"type":"scatter","mode":"lines","line":{"color":"rgba(255,217,47,1)","width":1.5},"name":"TEF","marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2015-12-31","2024-12-31"],"y":[1,1],"type":"scatter","mode":"lines","name":"IBEX (benchmark)","line":{"color":"black","width":4,"dash":"solid"},"marker":{"color":"rgba(227,119,194,1)","line":{"color":"rgba(227,119,194,1)"}},"error_y":{"color":"rgba(227,119,194,1)"},"error_x":{"color":"rgba(227,119,194,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p><br />
+El gráfico de correlaciones confirma los patrones cíclicos anteriores,
+destacando el comportamiento de Grifols como el más llamativo al
+mantener una correlación negativa persistente con el mercado durante la
+pandemia.<br />
+<br />
+Por lo general, el resto de activos muestran correlaciones positivas
+incluso fuertes, considerando la inherente inestabilidad de los mercados
+financieros con el índice IBEX, salvo en momentos específicos
+probablemente asociados a crisis sectoriales que generan episodios
+temporales de descorrelación.<br />
+<br />
+</p>
+</div>
+<div id="descomposición-de-componentes" class="section level3">
+<h3>Descomposición de componentes</h3>
+<p><br />
+Para finiquitar la exploración estructural de los datos, se realiza una
+descomposición de los componentes, mediante la representación de una
+serie con distribución normal (Inditext), otra con distribución no
+normal (Santander) y el propio mercado del IBEX.<br />
+<br />
+</p>
+<pre class="r"><code>series_retornos &lt;- list(
+  &quot;IBEX&quot; = ibex_mensual$log_return_IBEX.Adjusted,
+  &quot;SAN&quot; = san_mc$log_return_SAN.MC.Adjusted, 
+  &quot;ITX&quot; = itx_mc$log_return_ITX.MC.Adjusted)
+
+descomponer_serie &lt;- function(serie_retornos, nombre) {
+  serie_limpia &lt;- na.omit(serie_retornos)
+  serie_ts &lt;- ts(serie_limpia, frequency = 12, start = c(2016, 1))
+  componentes &lt;- decompose(serie_ts, type = &quot;additive&quot;)
+  autoplot(componentes, main = paste(&quot;Descomposición ETL -&quot;, nombre))
+}</code></pre>
+<pre class="r"><code>descomponer_serie(series_retornos$IBEX, &quot;IBEX (No Normal)&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>descomponer_serie(series_retornos$SAN, &quot;Santander (No Normal)&quot;)  </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-13-2.png" width="672" /></p>
+<pre class="r"><code>descomponer_serie(series_retornos$ITX, &quot;Inditex (Normal)&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-13-3.png" width="672" /><br />
+Las series analizadas presentan estacionariedad en media, evidenciada
+por la ausencia de tendencia significativa a lo largo de las tres
+series. Tampoco muestran estacionalidad relevante, lo que descarta
+patrones cíclicos predecibles en los retornos mensuales.<br />
+<br />
+El componente residual domina la variabilidad en los tres casos, siendo
+notable su asimetría negativa en IBEX y Santander (agrupamiento hacia
+pérdidas), mientras que Inditex exhibe una distribución más balanceada.
+Esta diferencia en los residuos merecería análisis futuros sobre su
+relación con la normalidad distribucional.<br />
+<br />
+</p>
+</div>
+<div id="comentarios-adicionales" class="section level3">
+<h3>Comentarios adicionales</h3>
+<p><br />
+POr lo tanto bajo estas circunstancias estructurales abordadas en la
+exploración, se podría llegar a confirmar que predecir retornos
+específicos es algo inviable dado el predominio del componente
+aleatorio. Sin embargo, la evolución temporal de la volatilidad y los
+cambios en correlación sugieren que sí pueden modelarse los patrones de
+riesgo aunque no su dirección específica.</p>
+</div>
+</div>
+<div id="creación-de-modelos" class="section level2">
+<h2>Creación de modelos</h2>
+<p><br />
+Para evaluar la capacidad predictiva de los retornos financieros, se
+implementan tres enfoques complementarios: un modelo naïve como punto de
+referencia realista, ARIMA para capturar dinámicas univariantes, y VAR
+para aprovechar las interdependencias detectadas entre activos. Esta
+selección permite comparar ganancias predictivas incrementalmente, desde
+la línea base hasta modelado multivariante.<br />
+<br />
+En adición a esto, se opta por la estrategia de train/validation/test
+set. De esta forma, se consigue mediante cada set, por un lado entrenar
+el modelo, identificar si hay un sobreajuste de parámetros en el
+entrenamiento y medir la calidad de las predicciones.<br />
+<br />
+</p>
+<div id="naïve" class="section level3">
+<h3>Naïve</h3>
+<p><br />
+El modelo naïve utilizado se basa en el supuesto de persistencia
+temporal, es decir, que el mejor predictor del próximo retorno es el
+retorno inmediatamente anterior. Este enfoque, aunque simple, establece
+una línea base realista contra la cual evaluar modelos más
+sofisticados.<br />
+<br />
+A continuación se crea una tabla que muestre los resultados del error
+cuadrático medio (RMSE) y del error medio absoluto (MAE) tanto en el
+train como en el validation set.<br />
+<br />
+</p>
+<pre class="r"><code>fecha_division_val &lt;- as.Date(&quot;2022-01-01&quot;)
+fecha_division_test &lt;- as.Date(&quot;2024-01-01&quot;)
+
+ajustar_naive &lt;- function(serie_retornos, nombre_activo) {
+  
+  serie_limpia &lt;- na.omit(serie_retornos)
+  serie_ts &lt;- ts(serie_limpia, frequency = 12, start = c(2016, 1))
+  
+  train &lt;- window(serie_ts, end = c(2021, 12))
+  validation &lt;- window(serie_ts, start = c(2022, 1), end = c(2023, 12))
+  test &lt;- window(serie_ts, start = c(2024, 1))
+  
+  modelo_naive &lt;- naive(train, h = length(validation))
+  
+  pred_val &lt;- forecast(modelo_naive, h = length(validation))
+  
+  accuracy_val &lt;- accuracy(pred_val, validation)
+  
+  return(list(
+    modelo = modelo_naive,
+    accuracy_val = accuracy_val,
+    train = train,
+    validation = validation,
+    test = test,
+    predicciones_val = pred_val))}
+
+resultados_naive &lt;- list()
+nombres_activos &lt;- c(&quot;IBEX&quot;, &quot;SAN&quot;, &quot;ITX&quot;, &quot;IBE&quot;, &quot;GRF&quot;, &quot;FER&quot;, &quot;TEF&quot;)
+
+for(activo in nombres_activos) {
+  if(activo == &quot;IBEX&quot;) {
+    df &lt;- ibex_mensual
+  } else {
+    df &lt;- get(paste0(tolower(activo), &quot;_mc&quot;))
+  }
+  
+  col_retorno &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)[1]
+  serie_retornos &lt;- df[, col_retorno]
+  
+  resultados_naive[[activo]] &lt;- ajustar_naive(serie_retornos, activo)}
+
+tabla_resultados &lt;- do.call(rbind, lapply(names(resultados_naive), function(activo) {
+  acc &lt;- resultados_naive[[activo]]$accuracy_val
+  data.frame(
+    Activo = activo,
+    RMSE_Train = acc[1, &quot;RMSE&quot;],
+    RMSE_Val = acc[2, &quot;RMSE&quot;],
+    MAE_Train = acc[1, &quot;MAE&quot;], 
+    MAE_Val = acc[2, &quot;MAE&quot;])}))
+
+kable(tabla_resultados, caption = &quot;Resultados Naïve - Train vs Validación&quot;) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>
+Resultados Naïve - Train vs Validación
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Activo
+</th>
+<th style="text-align:right;">
+RMSE_Train
+</th>
+<th style="text-align:right;">
+RMSE_Val
+</th>
+<th style="text-align:right;">
+MAE_Train
+</th>
+<th style="text-align:right;">
+MAE_Val
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+IBEX
+</td>
+<td style="text-align:right;">
+8.277622
+</td>
+<td style="text-align:right;">
+4.975013
+</td>
+<td style="text-align:right;">
+6.160845
+</td>
+<td style="text-align:right;">
+3.608008
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAN
+</td>
+<td style="text-align:right;">
+14.541693
+</td>
+<td style="text-align:right;">
+8.756180
+</td>
+<td style="text-align:right;">
+11.729490
+</td>
+<td style="text-align:right;">
+7.835463
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ITX
+</td>
+<td style="text-align:right;">
+11.591203
+</td>
+<td style="text-align:right;">
+11.711632
+</td>
+<td style="text-align:right;">
+8.660691
+</td>
+<td style="text-align:right;">
+10.173037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IBE
+</td>
+<td style="text-align:right;">
+9.567118
+</td>
+<td style="text-align:right;">
+6.040823
+</td>
+<td style="text-align:right;">
+7.102160
+</td>
+<td style="text-align:right;">
+5.051719
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GRF
+</td>
+<td style="text-align:right;">
+9.296058
+</td>
+<td style="text-align:right;">
+17.540169
+</td>
+<td style="text-align:right;">
+7.141817
+</td>
+<td style="text-align:right;">
+14.767280
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FER
+</td>
+<td style="text-align:right;">
+10.269880
+</td>
+<td style="text-align:right;">
+13.995649
+</td>
+<td style="text-align:right;">
+7.564405
+</td>
+<td style="text-align:right;">
+13.226964
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEF
+</td>
+<td style="text-align:right;">
+12.272823
+</td>
+<td style="text-align:right;">
+12.813266
+</td>
+<td style="text-align:right;">
+9.509214
+</td>
+<td style="text-align:right;">
+10.451581
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+En general, los errores calculados se podrían calificar como elevados,
+especialmente para aquellos activos más volátiles. Sin embargo, al ser
+Naïve el modelo más básico, estos resultados establecen una línea base
+realista contra la cual evaluar modelos más sofisticados, ya que existe
+un amplio margen de mejora en la reducción del error.<br />
+<br />
+</p>
+</div>
+<div id="arima" class="section level3">
+<h3>ARIMA</h3>
+<p><br />
+El modelo ARIMA es más complejo porque ajusta tres parámetros por serie,
+siendo estos: p (el componente autoregresivo o dependencia con valores
+pasados), d (la estacionariedad) y q (la media móvil o efecto de errores
+previos).<br />
+<br />
+</p>
+<pre class="r"><code>ajustar_arima &lt;- function(serie_retornos, nombre_activo) {
+  
+  serie_limpia &lt;- na.omit(serie_retornos)
+  serie_ts &lt;- ts(serie_limpia, frequency = 12, start = c(2016, 1))
+  
+  train &lt;- window(serie_ts, end = c(2021, 12))
+  validation &lt;- window(serie_ts, start = c(2022, 1), end = c(2023, 12))
+  test &lt;- window(serie_ts, start = c(2024, 1))
+  
+  modelo_arima &lt;- auto.arima(train, seasonal = FALSE, 
+                             stepwise = TRUE, approximation = TRUE)
+  
+  pred_val &lt;- forecast(modelo_arima, h = length(validation))
+  
+  accuracy_val &lt;- accuracy(pred_val, validation)
+  
+  orden_modelo &lt;- arimaorder(modelo_arima)
+  
+  return(list(
+    modelo = modelo_arima,
+    accuracy_val = accuracy_val,
+    train = train,
+    validation = validation,
+    test = test,
+    predicciones_val = pred_val,
+    orden = orden_modelo))}
+
+resultados_arima &lt;- list()
+
+for(activo in nombres_activos) {
+  if(activo == &quot;IBEX&quot;) {
+    df &lt;- ibex_mensual
+  } else {
+    df &lt;- get(paste0(tolower(activo), &quot;_mc&quot;))
+  }
+  
+  col_retorno &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)[1]
+  serie_retornos &lt;- df[, col_retorno]
+  
+  resultados_arima[[activo]] &lt;- ajustar_arima(serie_retornos, activo)}
+
+tabla_arima &lt;- do.call(rbind, lapply(names(resultados_arima), function(activo) {
+  acc &lt;- resultados_arima[[activo]]$accuracy_val
+  orden &lt;- paste(resultados_arima[[activo]]$orden, collapse = &quot;-&quot;)
+  
+  data.frame(
+    Activo = activo,
+    Modelo_ARIMA = orden,
+    RMSE_Train = acc[1, &quot;RMSE&quot;],
+    RMSE_Val = acc[2, &quot;RMSE&quot;], 
+    MAE_Train = acc[1, &quot;MAE&quot;],
+    MAE_Val = acc[2, &quot;MAE&quot;],
+    stringsAsFactors = FALSE)}))
+
+kable(tabla_arima, caption = &quot;Resultados ARIMA - Train vs Validación&quot;) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>
+Resultados ARIMA - Train vs Validación
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Activo
+</th>
+<th style="text-align:left;">
+Modelo_ARIMA
+</th>
+<th style="text-align:right;">
+RMSE_Train
+</th>
+<th style="text-align:right;">
+RMSE_Val
+</th>
+<th style="text-align:right;">
+MAE_Train
+</th>
+<th style="text-align:right;">
+MAE_Val
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+IBEX
+</td>
+<td style="text-align:left;">
+0-0-0
+</td>
+<td style="text-align:right;">
+5.544637
+</td>
+<td style="text-align:right;">
+4.676055
+</td>
+<td style="text-align:right;">
+3.806617
+</td>
+<td style="text-align:right;">
+3.438851
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAN
+</td>
+<td style="text-align:left;">
+0-0-0
+</td>
+<td style="text-align:right;">
+10.212438
+</td>
+<td style="text-align:right;">
+7.880456
+</td>
+<td style="text-align:right;">
+7.119576
+</td>
+<td style="text-align:right;">
+6.488406
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ITX
+</td>
+<td style="text-align:left;">
+0-0-1
+</td>
+<td style="text-align:right;">
+7.205779
+</td>
+<td style="text-align:right;">
+8.536079
+</td>
+<td style="text-align:right;">
+5.529544
+</td>
+<td style="text-align:right;">
+6.511370
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IBE
+</td>
+<td style="text-align:left;">
+1-0-0
+</td>
+<td style="text-align:right;">
+5.499477
+</td>
+<td style="text-align:right;">
+5.113980
+</td>
+<td style="text-align:right;">
+4.594856
+</td>
+<td style="text-align:right;">
+4.173786
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GRF
+</td>
+<td style="text-align:left;">
+0-0-0
+</td>
+<td style="text-align:right;">
+6.425704
+</td>
+<td style="text-align:right;">
+16.580780
+</td>
+<td style="text-align:right;">
+4.967705
+</td>
+<td style="text-align:right;">
+13.397892
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FER
+</td>
+<td style="text-align:left;">
+1-0-0
+</td>
+<td style="text-align:right;">
+6.530014
+</td>
+<td style="text-align:right;">
+4.929298
+</td>
+<td style="text-align:right;">
+5.015826
+</td>
+<td style="text-align:right;">
+3.967541
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEF
+</td>
+<td style="text-align:left;">
+0-0-0
+</td>
+<td style="text-align:right;">
+7.970434
+</td>
+<td style="text-align:right;">
+7.416792
+</td>
+<td style="text-align:right;">
+5.955460
+</td>
+<td style="text-align:right;">
+6.270636
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+Los resultados de ARIMA muestran errores de validación relativamente
+bajos para algunos activos, sugiriendo capacidad predictiva moderada,
+dado que no parecen que hayan signos de sobreajuste evidente a simple
+vista. La estructura de parámetros seleccionada automáticamente revela
+patrones diferenciados, ya que Iberdrola y Ferrovial dependen
+principalmente de sus valores pasados, mientras que Inditex responde más
+a shocks anteriores. Esta diferencia en las dinámicas temporales puede
+ser una explicación parcial en las diferencias en rendimiento predictivo
+entre activos.<br />
+<br />
+</p>
+</div>
+<div id="var" class="section level3">
+<h3>VAR</h3>
+<p><br />
+El modelo VAR se extiende hacia el ámbito multivariante, modelando cada
+serie en función de sus valores pasados y de los retardos de las demás
+variables. Este enfoque captura dependencias cruzadas entre activos,
+reflejando la interconexión propia de los mercados financieros.<br />
+<br />
+</p>
+<pre class="r"><code>preparar_datos_var &lt;- function() {
+  series_list &lt;- list()
+  
+  for(activo in nombres_activos) {
+    if(activo == &quot;IBEX&quot;) {
+      df &lt;- ibex_mensual} else {
+      df &lt;- get(paste0(tolower(activo), &quot;_mc&quot;))}
+    
+    col_retorno &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)[1]
+    serie &lt;- na.omit(df[, col_retorno])
+    series_list[[activo]] &lt;- serie  }
+  
+  datos_var &lt;- do.call(merge, series_list)
+  colnames(datos_var) &lt;- nombres_activos
+  
+  return(datos_var)}
+
+datos_var &lt;- preparar_datos_var()
+
+ajustar_var_completo &lt;- function(datos_var) {
+  
+  datos_df &lt;- na.omit(as.data.frame(datos_var))
+  datos_ts &lt;- ts(datos_df, frequency = 12, start = c(2016, 1))
+  
+  train &lt;- window(datos_ts, end = c(2021, 12))
+  validation &lt;- window(datos_ts, start = c(2022, 1), end = c(2023, 12))
+  test &lt;- window(datos_ts, start = c(2024, 1))
+  
+  lag_seleccion &lt;- VARselect(train, lag.max = 8, type = &quot;const&quot;)
+  lag_optimo &lt;- lag_seleccion$selection[&quot;AIC(n)&quot;]
+  
+  modelo_var &lt;- VAR(train, p = lag_optimo, type = &quot;const&quot;)
+
+  fitted_vals &lt;- fitted(modelo_var)
+  
+  pred_val &lt;- predict(modelo_var, n.ahead = nrow(validation))
+  
+  resultados_completos &lt;- list()
+  
+  for(activo in nombres_activos) {
+    real_train &lt;- train[, activo]
+    pred_train &lt;- fitted_vals[, activo]
+    
+    rmse_train &lt;- sqrt(mean((real_train - pred_train)^2))
+    mae_train &lt;- mean(abs(real_train - pred_train))
+    
+    real_val &lt;- validation[, activo]
+    pred_val_activo &lt;- pred_val$fcst[[activo]][, &quot;fcst&quot;]
+    
+    rmse_val &lt;- sqrt(mean((real_val - pred_val_activo)^2))
+    mae_val &lt;- mean(abs(real_val - pred_val_activo))
+    
+    resultados_completos[[activo]] &lt;- data.frame(
+      RMSE_Train = rmse_train,
+      RMSE_Val = rmse_val,
+      MAE_Train = mae_train,
+      MAE_Val = mae_val,
+      Lag = lag_optimo)}
+  
+  return(do.call(rbind, resultados_completos))}
+
+resultados_var_completo &lt;- ajustar_var_completo(datos_var)
+
+kable(resultados_var_completo, caption = &quot;Resultados VAR - Train vs Validation&quot;, digits = 3) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>
+Resultados VAR - Train vs Validation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+RMSE_Train
+</th>
+<th style="text-align:right;">
+RMSE_Val
+</th>
+<th style="text-align:right;">
+MAE_Train
+</th>
+<th style="text-align:right;">
+MAE_Val
+</th>
+<th style="text-align:right;">
+Lag
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+IBEX
+</td>
+<td style="text-align:right;">
+8.672
+</td>
+<td style="text-align:right;">
+13.100
+</td>
+<td style="text-align:right;">
+5.777
+</td>
+<td style="text-align:right;">
+11.694
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAN
+</td>
+<td style="text-align:right;">
+15.169
+</td>
+<td style="text-align:right;">
+28.851
+</td>
+<td style="text-align:right;">
+10.654
+</td>
+<td style="text-align:right;">
+23.605
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ITX
+</td>
+<td style="text-align:right;">
+11.194
+</td>
+<td style="text-align:right;">
+24.205
+</td>
+<td style="text-align:right;">
+8.216
+</td>
+<td style="text-align:right;">
+18.139
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IBE
+</td>
+<td style="text-align:right;">
+7.583
+</td>
+<td style="text-align:right;">
+17.515
+</td>
+<td style="text-align:right;">
+5.980
+</td>
+<td style="text-align:right;">
+14.295
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GRF
+</td>
+<td style="text-align:right;">
+9.212
+</td>
+<td style="text-align:right;">
+19.651
+</td>
+<td style="text-align:right;">
+6.991
+</td>
+<td style="text-align:right;">
+16.938
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FER
+</td>
+<td style="text-align:right;">
+9.833
+</td>
+<td style="text-align:right;">
+16.270
+</td>
+<td style="text-align:right;">
+7.130
+</td>
+<td style="text-align:right;">
+13.826
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEF
+</td>
+<td style="text-align:right;">
+12.489
+</td>
+<td style="text-align:right;">
+18.986
+</td>
+<td style="text-align:right;">
+9.794
+</td>
+<td style="text-align:right;">
+16.069
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+El VAR muestra signos de sobreajuste, con errores de validación
+sustancialmente mayores que en el entrenamiento.Además, un lag de 8
+meses sugiere que el modelo puede estar capturar más ruido que señales
+(sobretodo en contextos financieros). La necesidad de tantos retardos
+puede indicar que el modelo está compensando su incapacidad para
+capturar patrones más simples con complejidad paramétrica.<br />
+<br />
+</p>
+</div>
+<div id="comparativa-entre-modelos" class="section level3">
+<h3>Comparativa entre modelos</h3>
+<p><br />
+Una vez ya se dispone de todos los modelos, se pasa hacer gráficos que
+comparen el RMSE y el MAE en la validation set.<br />
+<br />
+</p>
+<pre class="r"><code>preparar_comparativa_val &lt;- function() {
+  
+  naive_df &lt;- data.frame(
+    Activo = tabla_resultados$Activo,
+    RMSE_Naive = tabla_resultados$RMSE_Val,
+    MAE_Naive = tabla_resultados$MAE_Val)
+  
+  arima_df &lt;- data.frame(
+    Activo = tabla_arima$Activo,
+    RMSE_ARIMA = tabla_arima$RMSE_Val,
+    MAE_ARIMA = tabla_arima$MAE_Val)
+  
+  var_df &lt;- data.frame(
+    Activo = rownames(resultados_var_completo), 
+    RMSE_VAR = resultados_var_completo$RMSE_Val,
+    MAE_VAR = resultados_var_completo$MAE_Val)
+  
+  comparativa &lt;- merge(naive_df, arima_df, by = &quot;Activo&quot;)
+  comparativa &lt;- merge(comparativa, var_df, by = &quot;Activo&quot;)
+  
+  return(comparativa)}
+
+comparativa_final_val &lt;- preparar_comparativa_val()
+
+df_mae_val &lt;- data.frame(
+  Activo = comparativa_final_val$Activo,
+  Naïve = comparativa_final_val$MAE_Naive,
+  ARIMA = comparativa_final_val$MAE_ARIMA,
+  VAR = comparativa_final_val$MAE_VAR)
+
+
+df_mae_val_long &lt;- pivot_longer(df_mae_val, 
+                                cols = c(Naïve, ARIMA, VAR), 
+                                names_to = &quot;Modelo&quot;, 
+                                values_to = &quot;MAE&quot;)
+
+ggplot(df_mae_val_long, aes(x = Activo, y = MAE, fill = Modelo)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;, alpha = 0.8) +
+  labs(title = &quot;Comparativa de MAE por Modelo - Validación (2022-2023)&quot;,
+       y = &quot;MAE&quot;, x = &quot;Activo&quot;) +
+  scale_fill_manual(values = c(&quot;Naïve&quot; = &quot;#E41A1C&quot;, &quot;ARIMA&quot; = &quot;#377EB8&quot;, &quot;VAR&quot; = &quot;#4DAF4A&quot;)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" width="672" /><br />
+</p>
+<pre class="r"><code>df_rmse_val &lt;- data.frame(
+  Activo = comparativa_final_val$Activo,
+  Naïve = comparativa_final_val$RMSE_Naive,
+  ARIMA = comparativa_final_val$RMSE_ARIMA,
+  VAR = comparativa_final_val$RMSE_VAR)
+
+df_rmse_val_long &lt;- pivot_longer(df_rmse_val, 
+                                 cols = c(Naïve, ARIMA, VAR), 
+                                 names_to = &quot;Modelo&quot;, 
+                                 values_to = &quot;RMSE&quot;)
+
+ggplot(df_rmse_val_long, aes(x = Activo, y = RMSE, fill = Modelo)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;, alpha = 0.8) +
+  labs(title = &quot;Comparativa de RMSE por Modelo - Validación (2022-2023)&quot;,
+       y = &quot;RMSE&quot;, x = &quot;Activo&quot;) +
+  scale_fill_manual(values = c(&quot;Naïve&quot; = &quot;#E41A1C&quot;, &quot;ARIMA&quot; = &quot;#377EB8&quot;, &quot;VAR&quot; = &quot;#4DAF4A&quot;)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" width="672" /><br />
+Gracias a ambos gráficos, es evidente que el mejor modelo
+consistentemente ha sido ARIMA sobre Naïve y VAR. En especial, vuelve a
+destacar Grifols como caso atípico, presentando los mayores errores en
+los tres modelos, lo que sugiere factores idiosincráticos no capturables
+mediante enfoques temporales convencionales. Donde naïve muestra cierto
+poder predictivo, ARIMA ofrece mejoras marginales, mientras que en
+series más volátiles, la ventaja de ARIMA resulta decisiva. El pobre
+rendimiento de VAR indica que las interdependencias multivariantes no
+aportan valor predictivo en este contexto.<br />
+<br />
+</p>
+</div>
+</div>
+<div id="test-set" class="section level2">
+<h2>Test set</h2>
+<p><br />
+Al haber definido ARIMA como el mejor modelo, se han escogido otra vez
+Santander, Inditex y el IBEX 35 como representantes de cada perfil
+definido para realizar las predicciones del año 2024.De esta manera,
+tras crear las predicciones, se grafica el contraste entre la predicción
+y la realidad, así como las métricas de RMSE y MAE, a las que se les
+añade MASE (cuantificar capacidad predictiva ganada respecto al método
+Naïve) y el ACF1 (conocer si la fórmula es válida si se calculan sus
+intervalos de confianza).<br />
+<br />
+</p>
+<pre class="r"><code>activos_analizar &lt;- c(&quot;IBEX&quot;, &quot;ITX&quot;, &quot;SAN&quot;)
+resultados_arima_test &lt;- list()
+
+for(activo in activos_analizar) {
+  if(activo == &quot;IBEX&quot;) {
+    df &lt;- ibex_mensual} else {
+    df &lt;- get(paste0(tolower(activo), &quot;_mc&quot;))}
+  
+  col_retorno &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)[1]
+  serie_completa &lt;- na.omit(df[, col_retorno])
+  fechas &lt;- index(serie_completa)
+  valores &lt;- as.numeric(serie_completa)
+  
+  fecha_corte &lt;- as.Date(&quot;2024-01-01&quot;)
+  idx_train &lt;- which(fechas &lt; fecha_corte)
+  idx_test &lt;- which(fechas &gt;= fecha_corte)
+  
+  train_vals &lt;- valores[idx_train]
+  test_vals &lt;- valores[idx_test]
+  test_fechas &lt;- fechas[idx_test]
+  
+  fit &lt;- auto.arima(train_vals)
+  forecast_vals &lt;- forecast::forecast(fit, h = length(test_vals))$mean
+  
+  resultados_arima_test[[activo]] &lt;- list(
+    datos = data.frame(
+      Fecha = test_fechas,
+      Real = test_vals,
+      Predicho = as.numeric(forecast_vals)),
+    modelo = arimaorder(fit))}
+
+for(activo in activos_analizar) {
+  df_plot &lt;- resultados_arima_test[[activo]]$datos
+  orden &lt;- resultados_arima_test[[activo]]$modelo
+  
+  p &lt;- ggplot(df_plot, aes(x = Fecha)) +
+    geom_line(aes(y = Real, color = &quot;Real&quot;), linewidth = 1) +
+    geom_line(aes(y = Predicho, color = &quot;Predicho&quot;), linewidth = 1, linetype = &quot;dashed&quot;) +
+    scale_color_manual(values = c(&quot;Real&quot; = &quot;blue&quot;, &quot;Predicho&quot; = &quot;red&quot;)) +
+    labs(title = paste(&quot;ARIMA(&quot;, paste(orden, collapse = &quot;,&quot;), &quot;) - &quot;, activo, sep = &quot;&quot;),
+         x = &quot;Fecha&quot;, y = &quot;Retorno Logarítmico (%)&quot;) +
+    theme_minimal()
+  
+  print(p)}</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-19-1.png" width="672" /><img src="index_files/figure-html/unnamed-chunk-19-2.png" width="672" /><img src="index_files/figure-html/unnamed-chunk-19-3.png" width="672" /><br />
+</p>
+<pre class="r"><code>calcular_metricas_avanzadas &lt;- function() {
+  metricas_avanzadas &lt;- data.frame(
+    Activo = character(),
+    RMSE_Test = numeric(),
+    MAE_Test = numeric(),
+    MASE = numeric(),
+    ACF1_Residuals = numeric(),
+    Tasa_Mejora = numeric(),
+    stringsAsFactors = FALSE)
+  
+  for(activo in c(&quot;IBEX&quot;, &quot;ITX&quot;, &quot;SAN&quot;)) {
+    if(exists(&quot;resultados_arima_test&quot;) &amp;&amp; activo %in% names(resultados_arima_test)) {
+      
+      datos &lt;- resultados_arima_test[[activo]]$datos
+      modelo &lt;- resultados_arima_test[[activo]]$modelo
+      
+      errores &lt;- datos$Real - datos$Predicho
+      rmse_test &lt;- sqrt(mean(errores^2))
+      mae_test &lt;- mean(abs(errores))
+      
+      if(activo == &quot;IBEX&quot;) {
+        df &lt;- ibex_mensual
+      } else {
+        df &lt;- get(paste0(tolower(activo), &quot;_mc&quot;))
+      }
+      col_retorno &lt;- grep(&quot;log_return&quot;, colnames(df), value = TRUE)[1]
+      serie_completa &lt;- na.omit(df[, col_retorno])
+      fechas &lt;- index(serie_completa)
+      valores &lt;- as.numeric(serie_completa)
+      fecha_corte &lt;- as.Date(&quot;2024-01-01&quot;)
+      idx_train &lt;- which(fechas &lt; fecha_corte)
+      train_vals &lt;- valores[idx_train]
+      
+      naive_errors &lt;- diff(train_vals)
+      mae_naive &lt;- mean(abs(naive_errors))
+      mase &lt;- ifelse(mae_naive &gt; 0, mae_test / mae_naive, NA)
+      
+      fit_temp &lt;- forecast::auto.arima(train_vals)
+      acf1_residuals &lt;- ifelse(length(residuals(fit_temp)) &gt; 1, 
+                               acf(residuals(fit_temp), plot = FALSE, lag.max = 1)$acf[2], 
+                               NA)
+      
+      tasa_mejora &lt;- ifelse(!is.na(mase), 1 - mase, NA)
+      
+      metricas_avanzadas &lt;- rbind(metricas_avanzadas, 
+                                  data.frame(Activo = activo,
+                                             RMSE_Test = rmse_test,
+                                             MAE_Test = mae_test,
+                                             MASE = mase,
+                                             ACF1_Residuals = acf1_residuals,
+                                             Tasa_Mejora = tasa_mejora))}}
+  return(metricas_avanzadas)}
+
+metricas_completas &lt;- calcular_metricas_avanzadas()
+
+kable(metricas_completas, 
+      caption = &quot;Métricas ARIMA - Test Set (2024)&quot;,
+      digits = 3) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;)) %&gt;%
+  column_spec(4, color = ifelse(metricas_completas$MASE &lt; 1, &quot;green&quot;, &quot;red&quot;)) %&gt;%
+  column_spec(5, color = ifelse(abs(metricas_completas$ACF1_Residuals) &lt; 0.1, &quot;green&quot;, &quot;red&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>
+Métricas ARIMA - Test Set (2024)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Activo
+</th>
+<th style="text-align:right;">
+RMSE_Test
+</th>
+<th style="text-align:right;">
+MAE_Test
+</th>
+<th style="text-align:right;">
+MASE
+</th>
+<th style="text-align:right;">
+ACF1_Residuals
+</th>
+<th style="text-align:right;">
+Tasa_Mejora
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+IBEX
+</td>
+<td style="text-align:right;">
+4.181
+</td>
+<td style="text-align:right;">
+3.136
+</td>
+<td style="text-align:right;color: green !important;">
+0.525
+</td>
+<td style="text-align:right;color: red !important;">
+-0.107
+</td>
+<td style="text-align:right;">
+0.475
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ITX
+</td>
+<td style="text-align:right;">
+6.575
+</td>
+<td style="text-align:right;">
+5.615
+</td>
+<td style="text-align:right;color: green !important;">
+0.630
+</td>
+<td style="text-align:right;color: red !important;">
+-0.120
+</td>
+<td style="text-align:right;">
+0.370
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAN
+</td>
+<td style="text-align:right;">
+6.991
+</td>
+<td style="text-align:right;">
+5.017
+</td>
+<td style="text-align:right;color: green !important;">
+0.457
+</td>
+<td style="text-align:right;color: green !important;">
+0.003
+</td>
+<td style="text-align:right;">
+0.543
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+En el test set, ARIMA se posiciona como el mejor modelo predictor, no
+por capturar dinámicas temporales complejas, sino porque en ausencia de
+autocorrelaciones significativas converge a una estrategia próxima a la
+media incondicional. Los valores de MASE (&gt;0.4) muestran una mejora
+clara respecto al naïve, y los residuos con ACF1 &lt;0.1 respaldan la
+validez estadística del ajuste. En este contexto y período, los
+resultados sugieren que los retornos se comportan de manera cercana a
+ruido blanco, coherente con la hipótesis de eficiencia de mercados, lo
+que hace que la media de valor 0 se convierta en una predicción difícil
+de superar.<br />
+<br />
+</p>
+</div>
+<div id="conclusiones" class="section level2">
+<h2>Conclusiones</h2>
+<p><br />
+Tomando todo lo considerado hasta ahora, los resultados muestran que
+ARIMA se posiciona como el mejor modelo entre los evaluados, no por
+captar dinámicas complejas, sino porque en ausencia de autocorrelación
+significativa converge a predicciones cercanas a cero. Este hallazgo es
+coherente con las evidencias previas del EDA, donde ya se observaba
+falta de estacionalidad y patrones débiles de dependencia temporal. Las
+métricas de error (MASE &lt; 1 y residuos sin autocorrelación) confirman
+que, aunque la mejora frente a predictores naïve es moderada, ARIMA
+ofrece la opción más robusta.<br />
+</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
