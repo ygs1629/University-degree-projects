@@ -1,6 +1,6 @@
 # IBEX 35 Stock Returns Forecasting
 
-[Full project version here](https://ygs1629.github.io/Time-Series-Forecasting-of-IBEX-35-Stocks/)
+[Full project version here](https://ygs1629.github.io/University-degree-projects/Time-Series-Forecasting-of-IBEX-35-Stocks/docs/index.html/)
 
 ## Overview
 Comprehensive time series analysis and forecasting of major Spanish stocks (2016-2024) comparing multiple statistical approaches for logarithmic returns prediction.
