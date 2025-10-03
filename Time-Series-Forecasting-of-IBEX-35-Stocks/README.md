@@ -1,6 +1,6 @@
 # IBEX 35 Stock Returns Forecasting
 
-[Full project version here](https://ygs1629.github.io/university-degree-projects/time-series/index-timeseries.html
+[Full project version here](https://ygs1629.github.io/University-degree-projects/time-series/index-timeseries.html
 )
 
 ## Overview
